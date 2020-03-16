@@ -21,6 +21,6 @@ class blocosDeTransacoes(list):
             d.append(b._dados())
 
         if len(d)%2 != 0:
-            d.append({'0':'0'})       
+            d.append('0:0')       
             
         return d
