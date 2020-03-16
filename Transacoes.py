@@ -64,7 +64,7 @@ class Voto(Transacoes):
         self._gerarHash()
     
     def _dados(self):
-        return "{}:{}".format(self.numero, self.aleatorio)
+        return ("{}:{}".format(self.numero, self.aleatorio))
 
     def _gerarHash(self):        
         self.Hash = sha256(self._dados().encode()).hexdigest()
