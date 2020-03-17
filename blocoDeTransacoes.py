@@ -38,7 +38,7 @@ class blocosDeTransacoesIntermediario(list):
         for dados in self:
             dicionarios.append(dados._dicionario())
         
-        dicionario = {"blocos":dicionarios}
+        dicionario = {"transacoes":dicionarios}
 
         return dicionario
 
@@ -69,19 +69,19 @@ class blocosDeTransacoesFinal(list):
     def exportar(self):
         dicionarios = []
         for dados in self:
-            dicionarios.append({dados._dicionaros})
+            dicionarios.append(dados._dicionario())
         
-        dicionario = {"blocos":dicionarios}
+        dicionario = {"transacoes":dicionarios}
         arquivo = open("blocofinal.json", "w+")
 
         
-        json.dump(dicionario, arquivo)
+        json.dump(dicionario, arquivo, indent=4)
     
     def dicionarios(self):
         dicionarios = []
         for dados in self:
             dicionarios.append(dados._dicionario())
         
-        dicionario = {"blocos":dicionarios}
+        dicionario = {"transacoes":dicionarios}
 
         return dicionario
