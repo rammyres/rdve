@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from pymerkle import MerkleTree
 from Transacoes import Voto
 from blocoDeTransacoes import blocosDeTransacoesFinal
