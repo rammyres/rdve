@@ -66,6 +66,14 @@ class blocosDeTransacoesFinal(list):
             
         return d
 
+    def validaSequencia(self):
+        for i in range(len(self)):
+            if len(self) == 1 and self[i].hashTransAnterior == '0':
+                return True
+            elif len(self) > 1 and i > 0 and self[i].hashTransAnterior != self[i-1].Hash:
+                return False
+            return True
+
     def exportar(self):
         dicionarios = []
         for dados in self:
@@ -76,6 +84,7 @@ class blocosDeTransacoesFinal(list):
 
         
         json.dump(dicionario, arquivo, indent=4)
+
     
     def dicionarios(self):
         dicionarios = []

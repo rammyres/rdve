@@ -14,3 +14,12 @@ class arvoreNaoConstruida(Exception):
 class tipoDeTransacaoDesconhecido(Exception):
     def __init__(self):
         self.message = "A transação a ser inserida deve ser de um tipo especifico"
+
+class deveSerBlocoDeTransacaoFinal(Exception):
+    def __init__(self):
+        self.message = "O bloco de transação para construção do bloco deve ser \
+                        do tipo blocoDeTransacoesFinal"
+
+class sequenciaDeHashesInvalida(Exception):
+    def __init__(self):
+        self.message = "O bloco de transações final possui um erro na validação da sequência dados"

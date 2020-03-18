@@ -5,7 +5,7 @@ from datetime import datetime
 
 class Transacoes:
 
-    hashTransAnterior = None
+    hashTransAnterior = '0'
     assinatura = ''
 
     def importarDadosBasicos(self, hashTransAnterior, assinatura):
