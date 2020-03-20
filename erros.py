@@ -23,3 +23,12 @@ class deveSerBlocoDeTransacaoFinal(Exception):
 class sequenciaDeHashesInvalida(Exception):
     def __init__(self):
         self.message = "O bloco de transações final possui um erro na validação da sequência dados"
+
+class arvoreDeMerkleInvalida(Exception):
+    def __init__(self):
+        self.message = "A árvore de Merkle computada a partir das transações do bloco\
+                        diverge da árvore persistida"
+
+class listaDeDicioariosVazia(Exception):
+    def __init__(self):
+        self.message = "Lista de dicionarios a ser importada está vazia"

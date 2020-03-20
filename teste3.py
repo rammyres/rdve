@@ -9,7 +9,7 @@ import json
 if __name__ == "__main__":
     x = blocosDeTransacoesFinal()
 
-    for i in range(1, 1000):
+    for i in range(1, 1000000):
         v = Voto(str(randint(1,10)))
         x.inserir(v)
     y = MerkleTree(*x.dados())
