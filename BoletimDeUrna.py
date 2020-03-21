@@ -1,5 +1,6 @@
 from blocoDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
-from erros import deveSerBlocoDeTransacaoFinal, quantidadeMenorQueUm, tipoDeTransacaoDesconhecido, sequenciaDeHashesInvalida, arvoreDeMerkleInvalida
+from erros import deveSerBlocoDeTransacaoFinal, quantidadeMenorQueUm, tipoDeTransacaoDesconhecido, sequenciaDeHashesInvalida, \
+                  arvoreDeMerkleInvalida, registroSemTransacoes
 from pymerkle import MerkleTree
 from collections import OrderedDict 
 from Transacoes import Transacoes, Voto, Eleitor, Candidato
@@ -18,6 +19,8 @@ class registroDeVotacao:
 
     @arvoreDeMerkle.setter
     def arvoreDeMerkle(self, arvore):
+        if not self.transacoes:
+            raise registroSemTransacoes
         _tArvore = MerkleTree(*self.transacoes.dados())
         if arvore != _tArvore:
             raise arvoreDeMerkleInvalida
@@ -48,8 +51,7 @@ class registroDeVotacao:
                     raise sequenciaDeHashesInvalida
             else: 
                 raise deveSerBlocoDeTransacaoFinal
- 
-        
+         
     def exportar(self, arquivo):
         _persistencia = open(arquivo, "w")
 

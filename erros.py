@@ -32,3 +32,8 @@ class arvoreDeMerkleInvalida(Exception):
 class listaDeDicioariosVazia(Exception):
     def __init__(self):
         self.message = "Lista de dicionarios a ser importada está vazia"
+
+
+class registroSemTransacoes(Exception):
+    def __init__(self):
+        self.message = "O registro de votação deve conter transações antes do calculo da árvore de assinaturas"

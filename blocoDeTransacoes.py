@@ -18,20 +18,38 @@ class blocosDeTransacoesIntermediario(list):
             
         return d
 
-    def exportar(self, arquivo):
+    def exportar(self, arq):
         dicionarios = []
         for dados in self:
-            dicionarios.append({dados._dicionaros})
+            dicionarios.append(dados._dicionario())
         
         dicionario = {"transacoes":dicionarios}
-        arquivo = open(arquivo, "w+")
+        arquivo = open(arq, "w+")
         
-        json.dump(dicionario, arquivo)
+        json.dump(dicionario, arquivo, indent=4)
+        arquivo.close()
 
     def importar(self, arquivo):
-        arq = open(arquivo, "r+")
+        arq = open(arquivo, "r")
 
-        json.load(arq)
+        _dicionarios = json.load(arq)
+
+        arq.close()
+
+        self._importarDicionarios(_dicionarios["transacoes"])
+
+    def _importarDicionarios(self, listaDeDicionarios):
+        if len(listaDeDicionarios)<1:
+            raise listaDeDicioariosVazia
+        else:
+            for d in listaDeDicionarios:
+                if d["tipo"] == "Eleitor":
+                    t = Eleitor(9, d["nome"], d["titulo"], d["endereco"], d["dataDoAlistamento"], d["timestamp"], d["aleatorio"])
+                elif d["tipo"] == "Candidato":
+                    t = Candidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
+                elif d["tipo"] == "Voto":
+                    t = Voto(9, d["numero"], d["aleatorio"])
+                self.inserir(t)
     
     def dicionarios(self):
         dicionarios = []
@@ -49,10 +67,13 @@ class blocosDeTransacoesFinal(list):
         if isinstance(transacao, Transacoes):
             if self and len(self)>0:
                 transacao.hashTransAnterior = self[-1].Hash
-                self.append(transacao)
+                
             else:
                 transacao.hashTransAnterior = '0'
-                self.append(transacao)
+            transacao._gerarHash()
+            
+            self.append(transacao)
+        
         else: 
             raise tipoDeTransacaoDesconhecido            
 
@@ -60,9 +81,6 @@ class blocosDeTransacoesFinal(list):
         d = []
         for b in self:
             d.append(b._dados())
-
-        if len(d)%2 != 0:
-            d.append('0:0')
             
         return d
 
@@ -74,16 +92,15 @@ class blocosDeTransacoesFinal(list):
                 return False
             return True
 
-    def exportar(self):
+    def exportar(self, arq):
         dicionarios = []
         for dados in self:
             dicionarios.append(dados._dicionario())
         
         dicionario = {"transacoes":dicionarios}
-        arquivo = open("blocofinal.json", "w+")
+        arquivo = open(arq, "w+")
         
         json.dump(dicionario, arquivo, indent=4)
-
     
     def dicionarios(self):
         dicionarios = []

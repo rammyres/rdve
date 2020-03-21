@@ -2,11 +2,14 @@ import ecdsa, codecs, os
 from hashlib import sha256
 from datetime import time
 from datetime import datetime
+from pymerkle.hashing import HashMachine
 
 class Transacoes:
 
     hashTransAnterior = '0'
-    assinatura = ''
+    assinatura = 'assinatura'
+    Hash = None
+    gerador = HashMachine()
 
 class Eleitor(Transacoes):
 
@@ -29,8 +32,6 @@ class Eleitor(Transacoes):
             self.titulo = titulo
             self.endereco = endereco
             self.dataDoAlistamento = dataDoAlistamento
-
-        self._gerarHash()
             
     
     def __key(self):
@@ -47,17 +48,19 @@ class Eleitor(Transacoes):
 
     def _dados(self):
         return "{}:{}:{}:{}:{}:{}:{}:{}:{}".format(self.tipo, self.aleatorio, self.nome, self.titulo, self.endereco, 
-                                             self.dataDoAlistamento, self.timestamp, self.hashTransAnterior, 
-                                             self.assinatura)
+                                                self.dataDoAlistamento, self.timestamp, self.hashTransAnterior, 
+                                                self.assinatura)
+
 
     def _dicionario(self):
         return {"tipo": self.tipo, "aleatorio": self.aleatorio, "nome": self.nome, "titulo": self.titulo,
                 "endereco": self.endereco, "dataDoAlistamento": self.dataDoAlistamento,
                 "timestamp": self.timestamp, "hashTransAnterior": self.hashTransAnterior, 
                 "assinatura": self.assinatura}
-
+    
     def _gerarHash(self):        
-        self.Hash = sha256(self._dados().encode()).hexdigest()
+        if not self.Hash:
+            self.Hash = self.gerador.hash(self._dados()).decode()
 
 class Candidato(Eleitor):
     def __init__(self, modo, nome, titulo, endereco, numero, processo, aleatorio = None, timestamp = None):
@@ -82,8 +85,6 @@ class Candidato(Eleitor):
             self.numero = numero
             self.processo = processo
 
-        self._gerarHash()
-
     def __key(self):
         return (self.tipo, self.aleatorio, self.nome, self.titulo, self.endereco, self.numero, 
                 self.processo, self.timestamp, self.hashTransAnterior, self.assinatura)
@@ -98,16 +99,22 @@ class Candidato(Eleitor):
     
     def _dados(self):
         return "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}".format(self.tipo, self.aleatorio, self.nome, self.titulo, self.endereco, 
-                                             self.numero, self.processo, self.timestamp, self.hashTransAnterior, 
-                                             self.assinatura)
+                                                self.numero, self.processo, self.timestamp, self.hashTransAnterior, 
+                                                self.assinatura)
 
     def _dicionario(self):
-        return {"tipo": self.tipo, "aleatorio": self.aleatorio, "nome": self.nome, "titulo": self.titulo,
-                "endereco": self.endereco, "numero": self.processo, "timestamp": self.timestamp,
-                "hashTransAnterior": self.hashTransAnterior, "assinatura": self.assinatura}
+        if self.Hash:
+            return {"tipo": self.tipo, "aleatorio": self.aleatorio, "nome": self.nome, "titulo": self.titulo,
+                   "endereco": self.endereco, "numero": self.processo, "timestamp": self.timestamp,
+                    "hashTransAnterior": self.hashTransAnterior, "hash": self.Hash, "assinatura": self.assinatura}
+        else:
+            return {"tipo": self.tipo, "aleatorio": self.aleatorio, "nome": self.nome, "titulo": self.titulo,
+                    "endereco": self.endereco, "numero": self.processo, "timestamp": self.timestamp,
+                    "hashTransAnterior": self.hashTransAnterior, "assinatura": self.assinatura}
 
     def _gerarHash(self):        
-        self.Hash = sha256(self._dados().encode()).hexdigest()
+        if not self.Hash:
+            self.Hash = self.gerador.hash(self._dados()).decode()
     
 class Voto(Transacoes):
     def __init__(self, modo, numero, aletorio = None):
@@ -120,18 +127,21 @@ class Voto(Transacoes):
             self.tipo = "Voto"
             self.numero = numero
             self.aleatorio = aletorio
-
-        self._gerarHash()
     
     def _dados(self):
         return "{}:{}:{}:{}:{}".format(self.tipo, self.numero, self.aleatorio, self.assinatura, self.hashTransAnterior)
 
     def _dicionario(self):
-        return {"tipo": self.tipo, "numero": self.numero, "aleatorio": self.aleatorio, "hash": self.Hash, 
-                "hashTransAnterior": self.hashTransAnterior, "assinatura": self.assinatura}
+        if self.Hash:
+            return {"tipo": self.tipo, "numero": self.numero, "aleatorio": self.aleatorio, "hash": self.Hash, 
+                    "hashTransAnterior": self.hashTransAnterior, "assinatura": self.assinatura}
+        else:
+            return {"tipo": self.tipo, "numero": self.numero, "aleatorio": self.aleatorio, 
+                    "hashTransAnterior": self.hashTransAnterior, "assinatura": self.assinatura}
 
     def _gerarHash(self):        
-        self.Hash = sha256(self._dados().encode()).hexdigest()
+        if not self.Hash:
+            self.Hash = self.gerador.hash(self._dados()).decode()
 
     def __key(self):
         return(self.tipo, self.numero, self.aleatorio, self.hashTransAnterior, self.assinatura)
