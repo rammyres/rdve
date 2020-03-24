@@ -1,5 +1,7 @@
-import ecdsa, codecs, os
-from hashlib import sha256
+import codecs, os
+import ecdsa 
+from erros import processoDeAssinaturaInvalido
+from ecdsa import SigningKey, curves, SECP256k1
 from datetime import time
 from datetime import datetime
 from pymerkle.hashing import HashMachine
@@ -7,9 +9,22 @@ from pymerkle.hashing import HashMachine
 class Transacoes:
 
     hashTransAnterior = '0'
-    assinatura = 'assinatura'
+    assinatura = None
     Hash = None
     gerador = HashMachine()
+
+    def assinar(self, dados = None, chavePrivada = None):
+        if dados == None or chavePrivada == None:
+            raise processoDeAssinaturaInvalido 
+        
+        assinatura = chavePrivada.sign(dados.encode())
+        assinaturaStr = codecs.encode(assinatura, 'hex').decode()
+        
+        return assinaturaStr
+    
+    def verificarAssinatura(self, assinatura, chavePublica):
+
+        return chavePublica.verify(assinatura, chavePublica)
 
 class Eleitor(Transacoes):
 
@@ -117,16 +132,17 @@ class Candidato(Eleitor):
             self.Hash = self.gerador.hash(self._dados()).decode()
     
 class Voto(Transacoes):
-    def __init__(self, modo, numero, aletorio = None):
+    def __init__(self, modo, numero, aletorio = None, assinatura = None):
         if modo == 1:
             self.tipo = "Voto"
             self.numero = numero
             self.aleatorio = codecs.encode(os.urandom(32), 'hex').decode()
-        
+                
         elif modo == 9:
             self.tipo = "Voto"
             self.numero = numero
             self.aleatorio = aletorio
+            self.assinatura = assinatura
     
     def _dados(self):
         return "{}:{}:{}:{}:{}".format(self.tipo, self.numero, self.aleatorio, self.assinatura, self.hashTransAnterior)

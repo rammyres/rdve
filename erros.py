@@ -37,3 +37,7 @@ class listaDeDicioariosVazia(Exception):
 class registroSemTransacoes(Exception):
     def __init__(self):
         self.message = "O registro de votação deve conter transações antes do calculo da árvore de assinaturas"
+
+class processoDeAssinaturaInvalido(Exception):
+    def __init__(self):
+        self.message = "Para assinatura o metódo deve receber os dados e a chave privada como parametros"

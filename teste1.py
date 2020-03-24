@@ -11,7 +11,7 @@ colorama.init(autoreset=True)
 
 if __name__ == "__main__":
     maquina = HashMachine()
-    nEleitores = 10
+    nEleitores = 10000
     blocosIntermediarios = []
     blocoFinal = blocosDeTransacoesFinal()
     nBlocos = math.ceil(math.log2(nEleitores))
