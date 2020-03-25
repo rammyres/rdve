@@ -1,4 +1,4 @@
-from Transacoes import Transacoes, Voto, Eleitor, Candidato
+from Transacoes import Transacoes, Voto, Eleitor, Candidato, Urna
 from erros import tipoDeTransacaoDesconhecido, listaDeDicioariosVazia
 import json
 
@@ -49,6 +49,8 @@ class blocosDeTransacoesIntermediario(list):
                     t = Candidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
                 elif d["tipo"] == "Voto":
                     t = Voto(9, d["numero"], d["aleatorio"])
+                elif d["tipo"] == "Urna":
+                    t = Urna(9, d["zona"], d["secao"], d["saldoInicial"], d["endereco"], d["timestamp"])
                 self.inserir(t)
     
     def dicionarios(self):
@@ -122,4 +124,6 @@ class blocosDeTransacoesFinal(list):
                     t = Candidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
                 elif d["tipo"] == "Voto":
                     t = Voto(9, d["numero"], d["aleatorio"])
+                elif d["tipo"] == "Urna":
+                    t = Urna(9, d["zona"], d["secao"], d["saldoInicial"], d["endereco"], d["timestamp"])
                 self.inserir(t)
