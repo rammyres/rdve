@@ -49,12 +49,20 @@ class Transacoes:
 
         if isinstance(self, Urna):
             arquivo = "tmp/chavePrivadaZ{}S{}.pem".format(zona, secao)
+            arquivo_2 = "tmp/chavePublicaZ{}S{}.pem".format(zona, secao)
+
+            if not os.path.exists("tmp"):
+                os.mkdir("tmp")
 
             arq = open(arquivo, "wb")
 
             arq.write(sk.to_pem())
 
             arq.close()
+
+            arq = open(arquivo_2, "wb")
+
+            arq.write(vk.to_pem())
         
         return enderecoPublico_b.decode()
 
