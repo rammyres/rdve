@@ -1,8 +1,9 @@
-from _transacoes import TransacoesEnderecaveis
+from Transacoes import Transacoes
 from datetime import datetime, date
+import Utilitarios
 import codecs, os 
 
-class Eleitor(TransacoesEnderecaveis):
+class Eleitor(Transacoes):
 
     def __init__(self, modo, nome, titulo, dataDoAlistamento, endereco = None, timestamp = None, aleatorio = None, Hash = None):
         
@@ -13,7 +14,7 @@ class Eleitor(TransacoesEnderecaveis):
             self.nome = nome
             self.titulo = titulo
             self.dataDoAlistamento = dataDoAlistamento
-            self.endereco = self.gerarEndereco()
+            self.endereco = gerarEndereco()
         
         elif modo == 9:
             self.tipo = "Eleitor"

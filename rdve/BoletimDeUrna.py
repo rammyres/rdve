@@ -1,15 +1,18 @@
-from blocoDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
-from erros import deveSerBlocoDeTransacaoFinal, quantidadeMenorQueUm, tipoDeTransacaoDesconhecido, sequenciaDeHashesInvalida, \
+from BlocosDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
+from Erros import deveSerBlocoDeTransacaoFinal, quantidadeMenorQueUm, tipoDeTransacaoDesconhecido, sequenciaDeHashesInvalida, \
                   arvoreDeMerkleInvalida, registroSemTransacoes
 from pymerkle import MerkleTree
 from collections import OrderedDict 
-from rdve import Transacoes, Voto, Eleitor, Candidato, Urna
-import utilitarios
+from Transacoes import Transacoes
+from Voto import Voto
+from Candidato import Candidato
+from Eleitor import Eleitor
+import Utilitarios
 import json, os
 
-class registroDeVotacao:
+class boletimDeUrna:
         _arvoreDeMerkle = None
-        transacoes = None 
+        votos = None 
 
         @property
         def arvoreDeMerkle(self):
@@ -17,7 +20,7 @@ class registroDeVotacao:
 
         @arvoreDeMerkle.setter
         def arvoreDeMerkle(self, arvore):
-            if not self.transacoes:
+            if not self.votos:
                 raise registroSemTransacoes
             _tArvore = MerkleTree(*self.transacoes.dados())
             if arvore != _tArvore:
@@ -41,14 +44,18 @@ class registroDeVotacao:
                         if arvore:
                             if arvore != _tArvore:
                                 raise arvoreDeMerkleInvalida
-                        self.transacoes = blocoTF
+                        self.votos = blocoTF
                         self.arvoreDeMerkle = _tArvore
 
                     else:
                         raise sequenciaDeHashesInvalida
                 else: 
                     raise deveSerBlocoDeTransacaoFinal
-            
+        
+        def receberVotos(self, _blocoFinal):
+            self.transacoes = _blocoFinal
+            self.arvoreDeMerkle = MerkleTree(*self.transacoes.dados())
+
         def dicionario(self): 
             return {"arvoreDeMerkle": self.arvoreDeMerkle.serialize(), "transacoes": self.transacoes.dicionarios()}
 
@@ -59,21 +66,17 @@ class registroDeVotacao:
 
             _persistencia.close()
 
-        def importar(self, arquivo):
-            _persistencia = open(arquivo, "r")
+        def importarDicionario(self, dicionario):
 
-            _bloco = json.load(_persistencia)
-
-            _tUrnaID = _bloco["urnaID"]
-            _tArvore = _bloco["arvoreDeMerkle"]
+            _tArvore = dicionario["arvoreDeMerkle"]
             _tTransacoesDict = OrderedDict()
-            _tTransacoesDict = _bloco["transacoes"]
+            _tTransacoesDict = dicionario["transacoes"]
 
             _tTransacoes = blocosDeTransacoesFinal()
             _tTransacoes.importarDicionarios(_tTransacoesDict["transacoes"])
 
             _tArvoreJson = open("tmp.json", "w")
-            json.dump(_tArvore, _tArvoreJson, indent=4)
+            json.dump(_tArvore, _tArvoreJson)
             _tArvoreJson.close()
 
             _tArvoreMerkle = MerkleTree.loadFromFile("tmp.json")
@@ -85,12 +88,7 @@ class registroDeVotacao:
             self.arvoreDeMerkle = _tArvoreMerkle
 
             _tArvoreJson = open("tmp.json", "w")
-            utilitarios.remover_seguramente("tmp.json", 5)
+            Utilitarios.remover_seguramente("tmp.json", 5)
             _tArvoreJson.close()
             
-            _persistencia.close()
-
-
-
-
-    
+            return self

@@ -1,8 +1,8 @@
-from rdve.Transacoes import Transacoes
-from rdve.Voto import Voto
-from rdve.Candidato import Candidato
-from rdve.Eleitor import Eleitor
-from erros import tipoDeTransacaoDesconhecido, listaDeDicioariosVazia
+from Transacoes import Transacoes
+from Voto import Voto
+from Candidato import Candidato
+from Eleitor import Eleitor
+from Erros import tipoDeTransacaoDesconhecido, listaDeDicioariosVazia
 import json
 
 class blocosDeTransacoesIntermediario(list):

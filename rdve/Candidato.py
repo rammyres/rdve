@@ -1,4 +1,4 @@
-from _eleitor import Eleitor
+from Eleitor import Eleitor
 from datetime import datetime, date
 import codecs, os 
 
