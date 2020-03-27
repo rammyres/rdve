@@ -1,4 +1,4 @@
-from Transacoes import Transacoes, Voto, Eleitor, Candidato, Urna
+from Transacoes import Transacoes, tVoto, tEleitor, tCandidato, tUrna
 from erros import tipoDeTransacaoDesconhecido, listaDeDicioariosVazia
 import json
 
@@ -44,13 +44,13 @@ class blocosDeTransacoesIntermediario(list):
         else:
             for d in listaDeDicionarios:
                 if d["tipo"] == "Eleitor":
-                    t = Eleitor(9, d["nome"], d["titulo"], d["endereco"], d["dataDoAlistamento"], d["timestamp"], d["aleatorio"])
+                    t = tEleitor(9, d["nome"], d["titulo"], d["endereco"], d["dataDoAlistamento"], d["timestamp"], d["aleatorio"])
                 elif d["tipo"] == "Candidato":
-                    t = Candidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
+                    t = tCandidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
                 elif d["tipo"] == "Voto":
-                    t = Voto(9, d["numero"], d["aleatorio"])
+                    t = tVoto(9, d["numero"], d["aleatorio"])
                 elif d["tipo"] == "Urna":
-                    t = Urna(9, d["zona"], d["secao"], d["saldoInicial"], d["endereco"], d["timestamp"])
+                    t = tUrna(9, d["zona"], d["secao"], d["saldoInicial"], d["endereco"], d["timestamp"])
                 self.inserir(t)
     
     def dicionarios(self):
@@ -119,11 +119,11 @@ class blocosDeTransacoesFinal(list):
         else:
             for d in listaDeDicionarios:
                 if d["tipo"] == "Eleitor":
-                    t = Eleitor(9, d["nome"], d["titulo"], d["endereco"], d["dataDoAlistamento"], d["timestamp"], d["aleatorio"])
+                    t = tEleitor(9, d["nome"], d["titulo"], d["endereco"], d["dataDoAlistamento"], d["timestamp"], d["aleatorio"])
                 elif d["tipo"] == "Candidato":
-                    t = Candidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
+                    t = tCandidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
                 elif d["tipo"] == "Voto":
-                    t = Voto(9, d["numero"], d["aleatorio"])
+                    t = tVoto(9, d["numero"], d["aleatorio"])
                 elif d["tipo"] == "Urna":
-                    t = Urna(9, d["zona"], d["secao"], d["saldoInicial"], d["endereco"], d["timestamp"])
+                    t = tUrna(9, d["zona"], d["secao"], d["saldoInicial"], d["endereco"], d["timestamp"])
                 self.inserir(t)

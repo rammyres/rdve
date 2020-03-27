@@ -12,7 +12,7 @@ colorama.init(autoreset=True)
 
 if __name__ == "__main__":
     maquina = HashMachine()
-    nUrnas = 300000
+    nUrnas = 1000
     nEleitores = 10000
     blocosIntermediarios = []
     urnas = []
