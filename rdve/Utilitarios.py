@@ -1,5 +1,5 @@
 import codecs, os, ecdsa, base58, binascii, hashlib
-from ecdsa import SigningKey, curves, SECP256k1
+from ecdsa import SigningKey, VerifyingKey, curves, SECP256k1
 
 
 def remover_seguramente(caminho, passagens):
@@ -25,6 +25,37 @@ def gerarChavePrivada(arquivo):
     _arq.write(_sk.to_pem())
     _arq.close()
 
+def gerarChavePublica(arquivo):
+    try:
+        _arq = open(arquivo, "rb")
+        chavePrivada = SigningKey.from_pem(_arq.read())
+        chavePublica = chavePrivada.verifying_key
+        return chavePublica
+    except IOError:
+        print("Arquivo inexistente")
+    finally:
+        _arq.close()
+
+def importarChavePrivada(arquivo):
+    try:
+        _arq = open(arquivo, "rb")
+        chavePrivada = SigningKey.from_pem(_arq.read())
+        return chavePrivada
+    except IOError:
+        print("Arquivo inexistente")
+    finally:
+        _arq.close()
+
+def importarChavePublica(arquivo):
+    try:
+        _arq = open(arquivo, "rb")
+        chavePublica = VerifyingKey.from_pem(_arq.read())
+        return chavePublica
+    except IOError:
+        print("Arquivo inexistente")
+    finally:
+        _arq.close()
+
 def ripemd160(x):
     d = hashlib.new('ripemd160')
     d.update(x)
@@ -39,7 +70,7 @@ def gerarEndereco(chavePrivada):
     #WIF = base58.b58encode(binascii.unhexlify(chaveCompleta+sha256b[:8]))
     
     # get public key , uncompressed address starts with "1"
-    _sk = open(chavePrivada)
+    _sk = open(chavePrivada, "rb")
     sk = ecdsa.SigningKey.from_pem(_sk.read())
     vk = sk.get_verifying_key()
     chavePublica = '04' + binascii.hexlify(vk.to_string()).decode()

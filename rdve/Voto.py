@@ -1,23 +1,45 @@
 from Transacoes import Transacoes
+from ecdsa import SECP256k1, VerifyingKey
 import codecs, os
 
-class Voto(Transacoes):
-    def __init__(self, modo, numero, enderecoDeOrigem, chavePrivada=None, aletorio = None, assinatura = None):
-        if modo == 1:
-            self.tipo = "Voto"
+class Voto:
+    assinatura = ''
+    def __init__(self, numero = None, enderecoDeOrigem = None, chavePrivada=None, aletorio = None, assinatura = None):
+        if numero and enderecoDeOrigem:
             self.numero = numero
             self.enderecoDeOrigem = enderecoDeOrigem
             self.aleatorio = codecs.encode(os.urandom(32), 'hex').decode()
-                
-        elif modo == 9:
-            self.tipo = "Voto"
-            self.numero = numero
-            self.enderecoDeOrigem = enderecoDeOrigem
-            self.aleatorio = aletorio
-            self.assinatura = assinatura
+            self.tVoto = tVoto(self.numero, self.aleatorio, self.enderecoDeOrigem, self.aleatorio, self.assinatura)
+
+    def importarDicionario(self, dicionario):
+        self.numero = dicionario["numero"]
+        self.enderecoDeOrigem = dicionario["enderecoDeOrigem"] 
+        self.aleatorio = dicionario["aleatorio"]
+        self.assinatura = dicionario["assinatura"]
+        
+    def importarVoto(self, numero, enderecoDeOrigem, aletorio, assinatura):
+        self.numero = numero
+        self.enderecoDeOrigem = enderecoDeOrigem
+        self.aleatorio = aletorio
+        self.assinatura = assinatura
+
+    def verificarAssinatura(self, dados, assinatura, chavePublica):
+        _vk = VerifyingKey.from_string(chavePublica)
+        return _vk.verify(assinatura, dados.encode())
     
+    def dados(self):
+        return "{}:{}:{}:{}".format(self.numero, self.aleatorio, self.enderecoDeOrigem, self.assinatura)
+
+class tVoto(Transacoes):
+    def __init__(self, numero, aleatorio, enderecoDeOrigem, aletorio, assinatura = None):
+        self.tipo = "Voto"
+        self.numero = numero
+        self.enderecoDeOrigem = enderecoDeOrigem
+        self.aleatorio = aletorio
+        self.assinatura = assinatura
+
     def _dados(self):
-        return "{}:{}:{}:{}:{}:{}".format(self.tipo, self.numero, self.aleatorio, self.enderecoDeOrigem, self.hashTransAnterior, self.assinatura)
+        return "{}:{}:{}:{}:{}".format(self.numero, self.aleatorio, self.enderecoDeOrigem, self.assinatura, self.hashTransAnterior)
 
     def _dicionario(self):
         if self.Hash:
