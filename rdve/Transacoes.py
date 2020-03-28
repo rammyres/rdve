@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import codecs 
 from Erros import processoDeAssinaturaInvalido
 from datetime import time, date, datetime

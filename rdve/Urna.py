@@ -1,11 +1,13 @@
+#!/usr/bin/env python3
 from Transacoes import Transacoes
+from Erros import urnaSemEndereco
 from Voto import Voto
 from Eleitor import Eleitor
 from Candidato import Candidato
 from BlocosDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
 from datetime import datetime, date
 from BoletimDeUrna import boletimDeUrna
-from Utilitarios import gerarEndereco, importarChavePrivada
+from Utilitarios import gerarEndereco, gerarChavePrivada, importarChavePrivada
 from ecdsa import SigningKey, SECP256k1
 import math, random
 
@@ -18,33 +20,48 @@ class Urna:
     chavePrivada = None
     cadidatos = []
 
-    def __init__(self, zona = None, secao = None, saldoInicial = None, endereco = None):
+    def __init__(self, eleicao = None, abrangencia = None, zona = None, secao = None, saldoInicial = None, endereco = None):
+        self.eleicao = eleicao
+        self.abrangencia = abrangencia
         self.zona = zona
         self.secao = secao
         self.saldo = saldoInicial
         self.timestamp = datetime.timestamp(datetime.now().timestamp())
-        self.endereco = endereco
-        self.boletimDeUrna = boletimDeUrna(zona, secao, self.endereco)
-        self.chavePrivada = importarChavePrivada("tmp/Zona{}Secao{}.pem".format(self.zona, self.secao))
-        self.transacaoUrna = tUrna(self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
+        self.boletimDeUrna = boletimDeUrna(eleicao, abrangencia, endereco, zona, secao, self.endereco)
 
-    def iniciarUrna(self, zona, secao, saldoInicial, endereco, timestamp):
-        self.tipo = "Urna"
+    def iniciarUrna(self, eleicao, abrangencia, zona, secao, saldoInicial, endereco, timestamp):
+        self.eleicao = eleicao
+        self.abrangencia = abrangencia
         self.zona = zona
         self.secao = secao
         self.saldo = saldoInicial
         self.timestamp = timestamp
         self.endereco = endereco
+    
+    def gerarChavePrivada(self, arquivo):
+        gerarChavePrivada(arquivo)
+        self.chavePrivada = importarChavePrivada(arquivo)
+
+    def gerarEndereco(self, arquivo):
+        if self.chavePrivada:
+            self.endereco = gerarEndereco(arquivo)
+        else:
+            raise urnaSemEndereco
+
+    def criarTransacao(self):
+        if self.endereco:
+            self.tUrna = tUrna(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
 
     def dados(self):
-        return(self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
+        return(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
 
     def carregarDicionario(self, dicionario):
         if dicionario["tipo"] == "Urna":
-            self.iniciarUrna(dicionario["zona"], dicionario["secao"], dicionario["saldoInicial"], dicionario["endereco"], dicionario["timestamp"])
+            self.iniciarUrna(dicionario["eleicao"], dicionario["abrangencia"], dicionario["zona"], dicionario["secao"], dicionario["saldoInicial"], dicionario["endereco"], dicionario["timestamp"])
         if dicionario["tipo"] == "Candidato":
-            candidato = (dicionario["numero"], dicionario["nome"], dicionario["endereco"])
-            self.cadidatos.append(candidato)
+            if dicionario["abrangencia"] == self.abrangencia and dicionario["eleicao"] == self.eleicao:
+                candidato = (dicionario["numero"], dicionario["nome"], dicionario["endereco"])
+                self.cadidatos.append(candidato)
 
     def exportarBlocosIntermediarios(self):
         for x in range(len(self.votosNaoProcessados)):
@@ -84,12 +101,12 @@ class Urna:
                 self.votosAProcessar.inserir(v)
 
     def exportarDicionario(self):
-        _dicionario = {"tipo": self.tipo, "zona": self.zona, "secao": self.secao, "saldoInicial": self.saldoInicial, "votos": self.votosAProcessar,
+        _dicionario = {"zona": self.zona, "secao": self.secao, "saldoInicial": self.saldoInicial, "votos": self.votosAProcessar,
                         "timestamp": self.timestamp, "endereco": self.endereco}
         return _dicionario
     
     def __key(self):
-        return (self.zona, self.secao, self.timestamp, self.endereco)
+        return (self.eleicao, self.abrangencia, self.zona, self.secao, self.timestamp, self.endereco)
     
     def __hash__(self):
         return hash(self.__key())
@@ -102,8 +119,10 @@ class Urna:
 
 class tUrna(Transacoes):
 
-    def __init__(self, zona, secao, saldo, timestamp, endereco):
+    def __init__(self, eleicao, abrangencia, zona, secao, saldo, timestamp, endereco):
         self.tipo = "Urna"
+        self.eleicao = eleicao
+        self.abrangencia = abrangencia
         self.zona = zona
         self.secao = secao
         self.saldo = saldo
@@ -112,13 +131,13 @@ class tUrna(Transacoes):
         self._gerarHash()
     
     def _dados(self):
-        return '{}:{}:{}:{}:{}:{}'.format(self.tipo, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
+        return '{}:{}:{}:{}:{}:{}:{}:{}'.format(self.tipo, self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
 
     def _gerarHash(self):        
         if not self.Hash:
             self.Hash = self.gerador.hash(self._dados()).decode()
     
     def _dicionario(self):
-        return {"tipo": self.tipo, "zona": self.zona, "secao": self.secao, "saldoInicial": self.saldo,
-                "endereco": self.endereco, "timestamp": self.timestamp, "assinatura": self.assinatura, 
+        return {"tipo": self.tipo, "eleicao": self.eleicao, "abrangencia": self.abrangencia, "zona": self.zona, "secao": self.secao, 
+                "saldoInicial": self.saldo, "endereco": self.endereco, "timestamp": self.timestamp, "assinatura": self.assinatura, 
                 "hashTransAnterior": self.hashTransAnterior, "hash": self.Hash}

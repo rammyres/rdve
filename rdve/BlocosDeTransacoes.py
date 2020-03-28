@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from Transacoes import Transacoes
 from Voto import Voto
 from Candidato import Candidato
@@ -47,11 +48,11 @@ class blocosDeTransacoesIntermediario(list):
         else:
             for d in listaDeDicionarios:
                 if d["tipo"] == "Eleitor":
-                    t = Eleitor(d["nome"], d["titulo"], d["endereco"], d["timestamp"], d["aleatorio"])
+                    t = Eleitor(d["nome"], d["titulo"], d["endereco"], d["timestamp"])
                 elif d["tipo"] == "Candidato":
-                    t = Candidato(["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
+                    t = Candidato(d["eleicao"], d["abrangencia"], d["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["timestamp"])
                 elif d["tipo"] == "Voto":
-                    t = Voto(d["numero"], d["aleatorio"])
+                    t = Voto(d["eleicao"], d["abrangencia"], d["numero"], d["aleatorio"])
                 self.inserir(t)
     
     def dicionarios(self):
@@ -120,7 +121,7 @@ class blocosDeTransacoesFinal(list):
         else:
             for d in listaDeDicionarios:
                 if d["tipo"] == "Eleitor":
-                    t = Eleitor(9, d["nome"], d["titulo"], d["endereco"], d["timestamp"], d["aleatorio"])
+                    t = Eleitor(d["nome"], d["titulo"], d["endereco"], d["timestamp"])
                 elif d["tipo"] == "Candidato":
                     t = Candidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
                 elif d["tipo"] == "Voto":

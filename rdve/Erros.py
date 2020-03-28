@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 class alturaDoNoMenorQueZero(Exception):
     def __init__(self):
         self.message = "A altura do nó/folha nao pode ser inferior a 0"
@@ -41,3 +42,7 @@ class registroSemTransacoes(Exception):
 class processoDeAssinaturaInvalido(Exception):
     def __init__(self):
         self.message = "Para assinatura o metódo deve receber os dados e a chave privada como parametros"
+
+class urnaSemEndereco(Exception):
+    def __init__(self):
+        self.message = "A urna deve ter um endereço válido para gerar uma transação válida"
