@@ -2,11 +2,11 @@
 
 from hashlib import sha256
 from pymerkle.hashing import HashMachine
-from datetime import date, datetime
 import json
 
 class BlocoGenesis:
     abrangencias = {}
+    hashAbrangencias = None
     Hash = None
 
     def __init__(self, eleicao):
@@ -29,6 +29,7 @@ class BlocoGenesis:
             while len(_abr_b)>0:
                 hashAbrangencias.update(_abr_b)
                 _abr_b = _abr.read(tamanho)
+        self.hashAbrangencias = hashAbrangencias.hexdigest()
         return "Genesis:{}:{}".format(self.dataVotacao, hashAbrangencias)
 
     def criarHash(self):
@@ -36,13 +37,16 @@ class BlocoGenesis:
         self.Hash = gerardorDeHash.hash(self.dados().encode()).decode()
 
     def dicionario(self):
-        _dicionario = {"Genesis":{"eleicao": self.eleicao, 
+        _dicionario = {"index": "0", "tipo":"Genesis",
+                        "bloco":{"eleicao": self.eleicao, 
+                                  "abrangencias":self.abrangencias,
+                                  "hashAbrangencias": self.hashAbrangencias,
                                   "dataVotacao": self.dataVotacao, 
-                                  "hash": self.criarHash()}
+                                  "hash": self.Hash}
                                   }
         return _dicionario
 
     def criarBlocoGenesis(self):
-        _arq = open("blockchain.json", "w")
+        _arq = open("blockchain.json", "w", encoding="latin-1")
         json.dump(self.dicionario(), _arq, indent=4)
         _arq.close()
