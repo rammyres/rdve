@@ -29,6 +29,9 @@ class Candidato(Eleitor):
         self.processo = processo
         self.timestamp = timestamp
 
+    def criarTransacao(self):
+        self.tCandidato = tCandidato(self.abrangencia, self.nome, self.titulo, self.cargo, self.numero, self.processo, self.endereco, self.timestamp)
+
     def __key(self):
         return (self.nome, self.titulo, self.endereco, self.numero, self.processo, self.timestamp)
 
@@ -51,21 +54,34 @@ class tCandidato(Transacoes):
         self.processo = processo
         self.endereco = endereco
         self.timestamp = timestamp
-
+        self.gerarHash()
     
-    def _dados(self):
+    def dados(self):
         return "{}:{}:{}:{}:{}:{}".format(self.nome, self.titulo, self.endereco, self.numero, self.processo, self.timestamp)
 
-    def _dicionario(self):
-        if self.Hash:
-            return {"tipo": self.tipo, "abrangencia": self.abrangencia, "nome": self.nome, "titulo": self.titulo,
-                   "endereco": self.endereco, "numero": self.processo, "timestamp": self.timestamp,
-                    "hashTransAnterior": self.hashTransAnterior, "hash": self.Hash, "assinatura": self.assinatura}
-        else:
-            return {"tipo": self.tipo, "abrangencia": self.abrangencia, "nome": self.nome, "titulo": self.titulo,
-                    "endereco": self.endereco, "numero": self.processo, "timestamp": self.timestamp,
-                    "hashTransAnterior": self.hashTransAnterior, "assinatura": self.assinatura}
+    def dicionario(self):
+        return {"tipo": self.tipo, "abrangencia": self.abrangencia, "nome": self.nome, "titulo": self.titulo,
+                "endereco": self.endereco, "numero": self.processo, "timestamp": self.timestamp,
+                "hashTransAnterior": self.hashTransAnterior, "hash": self.Hash, "assinatura": self.assinatura}
 
-    def _gerarHash(self):        
+    def importarDicionario(self, dicionario):
+        self.tipo = dicionario["tipo"]
+        self.abrangencia = dicionario["abrangencia"]
+        self.cargo = dicionario["cargo"]
+        self.nome = dicionario["nome"]
+        self.titulo = dicionario["titulo"]
+        self.numero = dicionario["numero"]
+        self.processo = dicionario["processo"]
+        self.endereco = dicionario["endereco"]
+        self.timestamp = dicionario["timestamp"]
+        self.hashTransAnterior = dicionario["hashTransAnterior"]
+        self.Hash = dicionario["hash"]
+        return self 
+
+    def gerarHash(self):        
         if not self.Hash:
-            self.Hash = self.gerador.hash(self._dados()).decode()
+            self.Hash = self.gerador.hash(self.dados()).decode()
+
+    def gerarObjeto(self):
+        _candidato = Candidato(self.abrangencia, self.nome, self.titulo, self.cargo, self.numero, self.processo, self.endereco, self.timestamp)
+        return _candidato

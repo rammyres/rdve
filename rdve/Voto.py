@@ -5,7 +5,7 @@ import codecs, os
 
 class Voto:
     assinatura = ''
-    def __init__(self, eleicao = None, abrangencia = None, numero = None, enderecoDeOrigem = None, chavePrivada=None, aletorio = None, assinatura = None):
+    def __init__(self, eleicao = None, abrangencia = None, numero = None, enderecoDeOrigem = None, aletorio = None, assinatura = None):
         if numero and enderecoDeOrigem:
             self.eleicao = eleicao 
             self.abrangencia = abrangencia
@@ -24,9 +24,8 @@ class Voto:
     def importarDicionario(self, dicionario):
         self.importarVoto(dicionario["eleicao"], dicionario['abrangencia'], dicionario["numero"], dicionario["enderecoDeOrigem"], 
                                     dicionario["aleatorio"], dicionario["assinatura"])        
-    
-    
-    def gerarTransacao(self):
+        
+    def criarTransacao(self):
         self.tVoto = tVoto(self.eleicao, self.abrangencia, self.numero, self.aleatorio, self.enderecoDeOrigem, self.assinatura)
 
     def verificarAssinatura(self, dados, assinatura, chavePublica):
@@ -46,10 +45,10 @@ class tVoto(Transacoes):
         self.aleatorio = aletorio
         self.assinatura = assinatura
 
-    def _dados(self):
+    def dados(self):
         return "{}:{}:{}:{}:{}".format(self.numero, self.aleatorio, self.enderecoDeOrigem, self.assinatura, self.hashTransAnterior)
 
-    def _dicionario(self):
+    def dicionario(self):
         if self.Hash:
             return {"tipo": self.tipo, "numero": self.numero, "aleatorio": self.aleatorio, "hash": self.Hash, "enderecoDeOrigem":self.enderecoDeOrigem,
                     "hashTransAnterior": self.hashTransAnterior, "assinatura": self.assinatura}
@@ -57,9 +56,27 @@ class tVoto(Transacoes):
             return {"tipo": self.tipo, "numero": self.numero, "aleatorio": self.aleatorio, "enderecoDeOrigem":self.enderecoDeOrigem,
                     "hashTransAnterior": self.hashTransAnterior, "assinatura": self.assinatura}
 
-    def _gerarHash(self):        
+    def gerarHash(self):        
         if not self.Hash:
-            self.Hash = self.gerador.hash(self._dados()).decode()
+            self.Hash = self.gerador.hash(self.dados()).decode()
+
+    def importarDicionario(self, dicionario):
+        self.tipo = dicionario["tipo"]
+        self.eleicao = dicionario["eleicao"]
+        self.abrangencia = dicionario["abrangencia"]
+        self.numero = dicionario["numero"]
+        self.enderecoDeOrigem = dicionario["enderecoDeOrigem"]
+        self.aleatorio = dicionario["aletorio"]
+        self.assinatura = dicionario["assinatura"]
+        self.hashTransAnterior = dicionario["hashTransAnterior"]
+        self.Hash = dicionario["hash"]
+        
+        return self
+
+    def gerarObjeto(self):
+        _voto = Voto(self.eleicao, self.abrangencia, self.numero, self.enderecoDeOrigem, self.aleatorio, self.assinatura)
+        return _voto
+
 
     def __key(self):
         return(self.tipo, self.numero, self.aleatorio, self.hashTransAnterior, self.assinatura)

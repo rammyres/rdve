@@ -128,16 +128,34 @@ class tUrna(Transacoes):
         self.saldo = saldo
         self.timestamp = timestamp
         self.endereco = endereco
-        self._gerarHash()
+        self.gerarHash()
     
-    def _dados(self):
+    def dados(self):
         return '{}:{}:{}:{}:{}:{}:{}:{}'.format(self.tipo, self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
 
-    def _gerarHash(self):        
+    def gerarHash(self):        
         if not self.Hash:
-            self.Hash = self.gerador.hash(self._dados()).decode()
+            self.Hash = self.gerador.hash(self.dados()).decode()
     
-    def _dicionario(self):
+    def dicionario(self):
         return {"tipo": self.tipo, "eleicao": self.eleicao, "abrangencia": self.abrangencia, "zona": self.zona, "secao": self.secao, 
                 "saldoInicial": self.saldo, "endereco": self.endereco, "timestamp": self.timestamp, "assinatura": self.assinatura, 
                 "hashTransAnterior": self.hashTransAnterior, "hash": self.Hash}
+
+    def gerarObjeto(self):
+        _urna = Urna(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.endereco)
+        return _urna
+
+    def importarDicionario(self, dicionario):
+        self.tipo = dicionario["tipo"]
+        self.eleicao = dicionario["eleicao"]
+        self.abrangencia = dicionario["abrangencia"]
+        self.zona = dicionario["zona"]
+        self.secao = dicionario["secao"]
+        self.saldo = dicionario["saldo"]
+        self.timestamp = dicionario["timestamp"]
+        self.endereco = dicionario["endereco"]
+        self.hashTransAnterior = dicionario["hashTransAnterior"]
+        self.Hash = dicionario["hash"]
+
+        return self

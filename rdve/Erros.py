@@ -46,3 +46,10 @@ class processoDeAssinaturaInvalido(Exception):
 class urnaSemEndereco(Exception):
     def __init__(self):
         self.message = "A urna deve ter um endereço válido para gerar uma transação válida"
+
+class dataInferiorAoLimite(Exception):
+    message = "A data apresentada é inferior ao limite de criação da votação"
+
+class listaDeTransacoesVazia(Exception):
+    message = "Lista de transações vazia"
+        

@@ -1,17 +1,31 @@
 #!/usr/bin/env python3
-
 from hashlib import sha256
 from pymerkle.hashing import HashMachine
+from datetime import datetime
+from rdve.Erros import dataInferiorAoLimite
 import json
 
 class BlocoGenesis:
     abrangencias = {}
     hashAbrangencias = None
+    _dataVotacao = None
     Hash = None
 
-    def __init__(self, eleicao):
+    def __init__(self, eleicao, dataVotacao):
         self.eleicao = eleicao # Eleicação no formado AAAATT, onde TT é o turno,
                                # exemplo, eleição 202001
+        self.dataVotacao = dataVotacao
+
+    @property
+    def dataVotacao(self):
+        return self._dataVotacao
+
+    @dataVotacao.setter
+    def dataVotacao(self, dataVotacao):
+        _tDataVotacao = datetime.strptime(dataVotacao, "%Y-%m-%d")
+        if _tDataVotacao <= datetime.today():
+            raise dataInferiorAoLimite
+        self._dataVotacao = dataVotacao
 
     def definirDataVotacao(self, data):
         self.dataVotacao = data
