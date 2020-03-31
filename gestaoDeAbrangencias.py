@@ -5,17 +5,26 @@ import json, colorama
 
 class abrangencias(OrderedDict):
     def __init__(self):
-        self.update({"1":"Brasil"})
+        self.update({"1":"BRASIL"})
         self.ultMun = 0
         self.ultEst = 0
 
+    def ordenarPorChave(self):
+        _tmp = OrderedDict(sorted(self.items()))
+        self.clear()
+        self.update(_tmp)
+
+
     def inserir(self, tipo, nome):
+        nome = str.upper(nome)
         if tipo == "3":
             self.ultEst += 1
             self.update({"3{:0>2d}".format(self.ultEst):nome})
         if tipo == "5":
             self.ultMun += 1
             self.update({"5{:0>4d}".format(self.ultMun):nome})
+
+        self.ordenarPorChave()
         self.exportarJson()
 
     def importarJson(self):
@@ -28,7 +37,7 @@ class abrangencias(OrderedDict):
                     self.ultEst += 1
                 elif k.startswith("5"):
                     self.ultMun += 1
-                self.update({k:_dict[k]})
+                self.update({k:str.upper(_dict[k])})
 
             _arq.close()
             return True
