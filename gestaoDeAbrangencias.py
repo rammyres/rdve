@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from colorama import init, Fore, Back, Style
 from collections import OrderedDict
-import json, colorama
+import json, colorama, copy
 
 class abrangencias(OrderedDict):
     def __init__(self):
@@ -14,18 +14,36 @@ class abrangencias(OrderedDict):
         self.clear()
         self.update(_tmp)
 
+    def listarEstados(self):
+        est = OrderedDict({"Estado":"Nome"})
+        if len(est) == 0:
+            return None
+        for k in self.keys():
+            if k.startswith("3"):
+                _d = {k[-2:]: self[k]}
+                est.update(_d)
+        return est
 
-    def inserir(self, tipo, nome):
+    def listarMunicipios(self):
+        mun = OrderedDict()
+        for k in self.keys():
+            if k.startswith("5"):
+                mun.update(str(k), self[k])
+        return mun
+
+    def inserir(self, tipo, nome, estado = None):
         nome = str.upper(nome)
         if tipo == "3":
             self.ultEst += 1
             self.update({"3{:0>2d}".format(self.ultEst):nome})
-        if tipo == "5":
+        if tipo == "5" and estado != None:
             self.ultMun += 1
-            self.update({"5{:0>4d}".format(self.ultMun):nome})
-
+            self.update({"5{:0>2d}{:0>3d}".format(estado, self.ultMun):nome})
+        elif tipo == "5" and estado != None:
+            return False
         self.ordenarPorChave()
         self.exportarJson()
+        return True
 
     def importarJson(self):
         try:
@@ -71,6 +89,15 @@ def menu():
 
 abrNacional = abrangencias()
 
+def listarEstados():
+       
+    if abrNacional.listarEstados() == None:
+        print("Não existem estados cadastrados")
+        return False
+    else:
+        for k in abrNacional.listarEstados().keys():
+            print("{} - {}".format(k, abrNacional.listarEstados()[k]))
+    return True
 
 if __name__ == "__main__":
     init(autoreset=True)
@@ -85,11 +112,19 @@ if __name__ == "__main__":
             abrNacional.listarAbrangencias()
         elif op == "2":
             _ab = input("Informe o tipo de abrangência (M para municipal, E para estadual): ")
-            _ab_n = input("Informe o nome da abrangência: ")
-
             if str.upper(_ab) == "M":
-                abrNacional.inserir("5", _ab_n)
+                while True:
+                    print("Selecione a qual estado pertence o município: ")
+                    if not listarEstados():
+                        break
+                    e = input("Numero do estado: ")
+                    _ab_n = input("Informe o nome da abrangência: ")
+                    abrNacional.inserir("5", _ab_n, int(e))
+                    break
             elif str.upper(_ab) == "E":
+                _ab_n = input("Informe o nome da abrangência: ")
                 abrNacional.inserir("3", _ab_n)
+            elif str.upper(_ab) != "E" and str.upper(_ab) != "M":
+                print("Opção invalida, digite M ou E")
         elif op == "9":
             break
