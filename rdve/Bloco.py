@@ -36,7 +36,9 @@ class listaDeTransacoes(list):
 
 class Bloco: 
     index = None
+    Hash_raiz = None
     Hash = None 
+    Nonce = 1
     HashBlocoAnterior = None
 
     @property
@@ -57,25 +59,37 @@ class Bloco:
         if transacoes and arvoreDeMerkle:
             self.transacoes = transacoes
             self.arvoreDeMerkle = arvoreDeMerkle
-            self.Hash = self.arvoreDeMerkle.rootHash
+            self.Hash_raiz = self.arvoreDeMerkle.rootHash
         else:
             self.transacoes = listaDeTransacoes()
+            self.calcularArvoreDeMerkle()
+            self.calcularHash()
 
     def calcularArvoreDeMerkle(self):
         if len(self.transacoes)<1:
             raise listaDeTransacoesVazia
         else:
             self.arvoreDeMerkle = MerkleTree(*self.transacoes.dados())
-            self.Hash = self.arvoreDeMerkle.rootHash
+            self.Hash_raiz = self.arvoreDeMerkle.rootHash
             
     def atualizarIndex(self, index):
         self.index = index
+
+    def calcularHash(self):
+        gerador = hashing.HashMachine()
+        _hash = ''
+        while not _hash.startswith('00000000'):
+            _dados = "{}{}{}".format(self.HashBlocoAnterior, self.Hash_raiz, self.Nonce)
+            _hash = gerador.hash(_dados)
+            self.Nonce += 1
+        self.Hash = _hash
 
     def serializarBloco(self):
         if self.transacoes and self.arvoreDeMerkle:
             _d = {"index": self.index, 
                   "HashBlocoAnterior": self.HashBlocoAnterior,
                   "Hash": self.Hash,
+                  "Hash_raiz": self.Hash_raiz,
                   "arvoreDeMerkle": self.arvoreDeMerkle.serialize(),
                   "transacoes": self.transacoes.dicionarios()}
         else:

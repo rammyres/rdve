@@ -1,0 +1,17 @@
+{
+    "index": "0",
+    "tipo": "Genesis",
+    "bloco": {
+        "eleicao": "2020-01",
+        "abrangencias": {
+            "1": "BRASIL",
+            "301": "PIAUI",
+            "501001": "ALTOS",
+            "501002": "CAMPO MAIOR"
+        },
+        "hashAbrangencias": "3632eae4149c7e83ff02d1114b3be198b107bd632975f72d358746b631701790",
+        "dataVotacao": "2020-04-30",
+        "nonce": 19729149,
+        "hash": "0000000043e600098e59e986a1c50223c3edf070ac1d3c4488378e313a5c15a2"
+    }
+}

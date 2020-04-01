@@ -7,6 +7,7 @@ import json
 
 class BlocoGenesis:
     abrangencias = {}
+    nonce = 1
     hashAbrangencias = None
     _dataVotacao = None
     Hash = None
@@ -34,8 +35,6 @@ class BlocoGenesis:
         _abr = open("abrangencias.json", "r")
         self.abrangencias = json.load(_abr)
         _abr.close()
-
-    def dados(self):
         hashAbrangencias = sha256()
         tamanho = 65536
         with open("abrangencias.json", "rb") as _abr:
@@ -44,11 +43,19 @@ class BlocoGenesis:
                 hashAbrangencias.update(_abr_b)
                 _abr_b = _abr.read(tamanho)
         self.hashAbrangencias = hashAbrangencias.hexdigest()
-        return "Genesis:{}:{}".format(self.dataVotacao, hashAbrangencias)
+
+    def dados(self):
+        return "Genesis:{}:{}:{}:{}:{}".format(self.eleicao, self.dataVotacao, self.hashAbrangencias, self.hashAbrangencias, self.nonce)
 
     def criarHash(self):
         gerardorDeHash = HashMachine()
-        self.Hash = gerardorDeHash.hash(self.dados().encode()).decode()
+        _hash = ''
+        while not _hash.startswith('00000000'):
+            print(self.dados())
+            _hash = gerardorDeHash.hash(self.dados().encode()).decode()
+            self.nonce += 1
+        self.Hash = _hash
+
 
     def dicionario(self):
         _dicionario = {"index": "0", "tipo":"Genesis",
@@ -56,6 +63,7 @@ class BlocoGenesis:
                                   "abrangencias":self.abrangencias,
                                   "hashAbrangencias": self.hashAbrangencias,
                                   "dataVotacao": self.dataVotacao, 
+                                  "nonce": self.nonce,
                                   "hash": self.Hash}
                                   }
         return _dicionario
