@@ -62,8 +62,6 @@ class Bloco:
             self.Hash_raiz = self.arvoreDeMerkle.rootHash
         else:
             self.transacoes = listaDeTransacoes()
-            self.calcularArvoreDeMerkle()
-            self.calcularHash()
 
     def calcularArvoreDeMerkle(self):
         if len(self.transacoes)<1:
@@ -85,6 +83,10 @@ class Bloco:
         self.Hash = _hash
 
     def serializarBloco(self):
+        if not self.arvoreDeMerkle:
+            self.calcularArvoreDeMerkle()
+        if not self.Hash:
+            self.calcularHash()
         if self.transacoes and self.arvoreDeMerkle:
             _d = {"index": self.index, 
                   "HashBlocoAnterior": self.HashBlocoAnterior,
