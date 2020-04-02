@@ -2,6 +2,7 @@
 from hashlib import sha256
 from pymerkle.hashing import HashMachine
 from datetime import datetime
+from time import time
 from rdve.Erros import dataInferiorAoLimite
 import json
 
@@ -50,12 +51,17 @@ class BlocoGenesis:
     def criarHash(self):
         gerardorDeHash = HashMachine()
         _hash = ''
-        while not _hash.startswith('00000000'):
-            print(self.dados())
+        _hora_inicial = time()
+        animation = "|/-\\"
+        idx = 0
+        print("Calculando hash do bloco gênesis")
+        while not _hash.startswith('0000000'):
+            print("{} - Tentativa {} - Tempo gasto: {:2f}".format(animation[idx % len(animation)], self.nonce, time()-_hora_inicial), end="\r")
             _hash = gerardorDeHash.hash(self.dados().encode()).decode()
+            idx += 1
             self.nonce += 1
+        print("{} - {}".format(self.nonce, _hash))
         self.Hash = _hash
-
 
     def dicionario(self):
         _dicionario = {"index": "0", "tipo":"Genesis",
