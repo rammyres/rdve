@@ -4,6 +4,7 @@ from Transacoes import Transacoes
 from Eleitor import tEleitor
 from Candidato import tCandidato
 from Urna import tUrna
+from hashlib import sha256
 from pymerkle import MerkleTree, hashing
 from Erros import arvoreDeMerkleInvalida, tipoDeTransacaoDesconhecido, registroSemTransacoes, listaDeTransacoesVazia
 import json
@@ -74,11 +75,12 @@ class Bloco:
         self.index = index
 
     def calcularHash(self):
-        gerador = hashing.HashMachine()
+        #gerador = hashing.HashMachine()
         _hash = ''
         while not _hash.startswith('00000000'):
             _dados = "{}{}{}".format(self.HashBlocoAnterior, self.Hash_raiz, self.Nonce)
-            _hash = gerador.hash(_dados)
+            #_hash = gerador.hash(_dados)
+            _hash = sha256(_dados.encode).hexdigest()
             self.Nonce += 1
         self.Hash = _hash
 

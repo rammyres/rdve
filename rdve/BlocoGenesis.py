@@ -55,12 +55,12 @@ class BlocoGenesis:
         animation = "|/-\\"
         idx = 0
         print("Calculando hash do bloco gênesis")
-        while not _hash.startswith('0000000'):
-            print("{} - Tentativa {} - Tempo gasto: {:2f}".format(animation[idx % len(animation)], self.nonce, time()-_hora_inicial), end="\r")
+        while not _hash.startswith('00000'):
+            print("{} - Tentativa {} - Tempo gasto: {:.2f}s".format(animation[idx % len(animation)], self.nonce, time()-_hora_inicial), end="\r")
             _hash = gerardorDeHash.hash(self.dados().encode()).decode()
             idx += 1
             self.nonce += 1
-        print("{} - {}".format(self.nonce, _hash))
+        print("{} - {}\nTempo gasto: {:.2f}s".format(self.nonce, _hash, time()-_hora_inicial))
         self.Hash = _hash
 
     def dicionario(self):

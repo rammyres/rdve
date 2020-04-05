@@ -4,6 +4,7 @@ from Erros import urnaSemEndereco
 from Voto import Voto
 from Eleitor import Eleitor
 from Candidato import Candidato
+from Cedulas import Cedulas
 from BlocosDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
 from datetime import datetime, date
 from BoletimDeUrna import boletimDeUrna
@@ -19,6 +20,7 @@ class Urna:
     endereco = None
     chavePrivada = None
     cadidatos = []
+    cedulas = Cedulas()
 
     def __init__(self, eleicao = None, abrangencia = None, zona = None, secao = None, saldoInicial = None, endereco = None):
         self.eleicao = eleicao

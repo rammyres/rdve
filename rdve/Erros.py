@@ -52,4 +52,10 @@ class dataInferiorAoLimite(Exception):
 
 class listaDeTransacoesVazia(Exception):
     message = "Lista de transações vazia"
+
+class saldoInconsistente(Exception):
+    message = "O saldo de cédulas e o comprimento da lista deve ser igual"
+
+class enderecoDaUrnaNulo(Exception):
+    message = "O endereço da urna não pode ser nulo"
         
