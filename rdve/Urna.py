@@ -52,7 +52,7 @@ class Urna:
 
     def criarTransacao(self):
         if self.endereco:
-            self.tUrna = tUrna(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
+            self.tUrna = tUrna(self.eleicao, self.abrangencia, self.cedulas, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
 
     def dados(self):
         return(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
@@ -60,6 +60,7 @@ class Urna:
     def carregarDicionario(self, dicionario):
         if dicionario["tipo"] == "Urna":
             self.iniciarUrna(dicionario["eleicao"], dicionario["abrangencia"], dicionario["zona"], dicionario["secao"], dicionario["saldoInicial"], dicionario["endereco"], dicionario["timestamp"])
+            self.cedulas.importarDicionario(dicionario["cedulas"])
         if dicionario["tipo"] == "Candidato":
             if dicionario["abrangencia"] == self.abrangencia and dicionario["eleicao"] == self.eleicao:
                 candidato = (dicionario["numero"], dicionario["nome"], dicionario["endereco"])
@@ -82,8 +83,13 @@ class Urna:
         assinatura = self.chavePrivada.sign(voto.dados().encode())
         return assinatura 
 
+    def sorteiaCedula(self):
+        if len(self.cedulas)>0:
+            random.shuffle(self.cedulas)
+            return self.cedulas.pop()
+
     def gerarVoto(self, numero):
-        v = Voto(numero, self.endereco)
+        v = Voto(self.eleicao, self.abrangencia, numero, self.sorteiaCedula().retornaIdCedula, self.endereco)
         v.assinatura = self.assinarVoto(v)
         return v
         
@@ -104,7 +110,7 @@ class Urna:
 
     def exportarDicionario(self):
         _dicionario = {"zona": self.zona, "secao": self.secao, "saldoInicial": self.saldoInicial, "votos": self.votosAProcessar,
-                        "timestamp": self.timestamp, "endereco": self.endereco}
+                        "timestamp": self.timestamp, "endereco": self.endereco, "cedulas": self.cedulas.dicionarios()}
         return _dicionario
     
     def __key(self):
@@ -121,7 +127,7 @@ class Urna:
 
 class tUrna(Transacoes):
 
-    def __init__(self, eleicao, abrangencia, zona, secao, saldo, timestamp, endereco):
+    def __init__(self, eleicao, abrangencia, cedulas, zona, secao, saldo, timestamp, endereco):
         self.tipo = "Urna"
         self.eleicao = eleicao
         self.abrangencia = abrangencia
@@ -130,10 +136,12 @@ class tUrna(Transacoes):
         self.saldo = saldo
         self.timestamp = timestamp
         self.endereco = endereco
+        self.cedulas = cedulas
         self.gerarHash()
     
     def dados(self):
-        return '{}:{}:{}:{}:{}:{}:{}:{}'.format(self.tipo, self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
+        return '{}:{}:{}:{}:{}:{}:{}:{}:{}'.format(self.tipo, self.eleicao, self.abrangencia, self.zona, self.secao, 
+                                                    self.saldo, self.timestamp, self.endereco, self.cedulas.hash_raiz)
 
     def gerarHash(self):        
         if not self.Hash:
@@ -159,5 +167,7 @@ class tUrna(Transacoes):
         self.endereco = dicionario["endereco"]
         self.hashTransAnterior = dicionario["hashTransAnterior"]
         self.Hash = dicionario["hash"]
+        self.cedulas.importarDicionario(dicionario["celulas"])
+        self.cedulas.calcularArvoreDeMerkle()
 
         return self

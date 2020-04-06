@@ -2,6 +2,8 @@ import os, codecs, json
 from pymerkle import hashing
 from Transacoes import Transacoes
 from Erros import saldoInconsistente, enderecoDaUrnaNulo
+from pymerkle import MerkleTree
+from uuid import uuid4
 
 class _Cedula:
     idCedula = None
@@ -11,11 +13,16 @@ class _Cedula:
             self.idCedula = idCedula
 
     def criarCedula(self):
-        self.idCedula = codecs.encode(os.urandom(32), 'hex').decode()
+        self.idCedula = uuid4()
+    
+    def retornIdCedula(self):
+        return self.idCedula
 
 class Cedulas(list):
     endUrna = None
     _saldo = None
+    arvoreDeMerkle = MerkleTree()
+    hash_raiz = None 
 
     @property
     def saldo(self, saldo):
@@ -39,6 +46,7 @@ class Cedulas(list):
         if isinstance(_cedula, _Cedula):
             self.append(_cedula)
             self.saldo += 1
+            self.arvoreDeMerkle.update(_cedula.idCedula)
 
     def criarCedulas(self, saldo):
         if not self.endUrna:
@@ -49,15 +57,27 @@ class Cedulas(list):
             self.inserir(_Cedula)
 
     def dicionarios(self):
+        if not self.hash_raiz:
+            self.calcularArvoreDeMerkle()
+            self.hash_raiz = self.arvoreDeMerkle.rootHash
         if len(self)>0:
             _dicionarios = []
             for _cedula in self:
                 _dicionario = {"idCedula": _cedula.idCedula}
                 _dicionarios.append(_dicionario)
             
-            return {"endUrna": self.endUrna, "cedulas":_dicionarios}
+            return {"endUrna": self.endUrna, "cedulas":_dicionarios, "hash_raiz": self.hash_raiz}
         else:
             return None
+
+    def _idsCedulas(self):
+        _dados = []
+        for _c in self:
+            _dados.append(_c.retornaIdCedula)
+        
+    def calcularArvoreDeMerkle(self):
+        for _id in self._idsCedulas():
+            self.arvoreDeMerkle.update(_id)
 
     def importarDicionario(self, dicionarios):
         endUrna = dicionarios["endUrna"]
@@ -77,9 +97,13 @@ class tCedulas(Transacoes):
             self.cedulas = []
             for _cedula in cedulas:
                 self.cedulas.append(_cedula)
+            self.arvoreDeMerkle = MerkleTree()
+            for _cedula in cedulas:
+                self.arvoreDeMerkle.update(_cedula.idCedula)
+            self.hash_raiz = self.arvoreDeMerkle.rootHash
 
     def dados(self):
-        return "{}:{}".format(self.endUrna, len(self.cedulas))
+        return "{}:{}:{}".format(self.endUrna, len(self.cedulas), self.hash_raiz)
 
     def gerarHash(self):
         gerador = hashing.HashMachine()
