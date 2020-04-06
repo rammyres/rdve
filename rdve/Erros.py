@@ -58,4 +58,7 @@ class saldoInconsistente(Exception):
 
 class enderecoDaUrnaNulo(Exception):
     message = "O endereço da urna não pode ser nulo"
+
+class hashDoBlocoDeCedulasInvalido(Exception):
+    message = "Há uma divergência entre algum dos hashes computados e persistidos"
         
