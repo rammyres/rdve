@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-from Transacoes import Transacoes
-from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido
-from Voto import Voto
-from Eleitor import Eleitor
-from Candidato import Candidato
-from Cedulas import Cedulas
-from BlocosDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
+from rdve.Transacoes import Transacoes
+from rdve.Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido
+from rdve.Voto import Voto
+from rdve.Eleitor import Eleitor
+from rdve.Candidato import Candidato
+from rdve.Cedulas import Cedulas
+from rdve.BlocosDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
 from datetime import datetime, date
-from BoletimDeUrna import boletimDeUrna
-from Utilitarios import gerarEndereco, gerarChavePrivada, importarChavePrivada
+from rdve.BoletimDeUrna import boletimDeUrna
+from rdve.Utilitarios import gerarEndereco, gerarChavePrivada, importarChavePrivada
 from ecdsa import SigningKey, SECP256k1
 from pymerkle import hashing
 import math, random, json
@@ -76,7 +76,7 @@ class Urna:
         _n = math.ceil(math.log2(self.saldoInicial))
         self.exportarBlocosIntermediarios()
         
-        for x in range (_n):
+        for _ in range (_n):
             lista = blocosDeTransacoesIntermediario()
             self.votosNaoProcessados.append(lista)
 
@@ -102,7 +102,7 @@ class Urna:
     def prepararVotosParaApuracao(self):
         self.votosAProcessar = blocosDeTransacoesFinal()
 
-        for x in range(len(self.votosNaoProcessados)):
+        for _ in range(len(self.votosNaoProcessados)):
             random.shuffle(self.votosNaoProcessados)
             if self.votosNaoProcessados[0]:
                 random.shuffle(self.votosNaoProcessados[0])

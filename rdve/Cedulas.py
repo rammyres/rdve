@@ -55,6 +55,8 @@ class Cedulas(list):
             _Cedula = _Cedula()
             _Cedula.criarCedula()
             self.inserir(_Cedula)
+        self.calcularArvoreDeMerkle()
+        self.hash_raiz = self.arvoreDeMerkle.rootHash
 
     def dicionarios(self):
         if not self.hash_raiz:
@@ -65,7 +67,6 @@ class Cedulas(list):
             for _cedula in self:
                 _dicionario = {"idCedula": _cedula.idCedula}
                 _dicionarios.append(_dicionario)
-            
             return {"endUrna": self.endUrna, "cedulas":_dicionarios, "hash_raiz": self.hash_raiz}
         else:
             return None
@@ -85,46 +86,4 @@ class Cedulas(list):
             _cedula = _Cedula()
             _cedula.endUrna = endUrna
             _cedula.idCedula = _dicionario["idCedula"]
-            self.inserir(_cedula)         
-
-    def criarTransacao(self):
-        self.tCedulas = tCedulas(self)
-
-class tCedulas(Transacoes):
-    def __init__(self, cedulas):
-        if isinstance(cedulas, Cedulas):
-            self.endUrna = cedulas.endUrna
-            self.cedulas = []
-            for _cedula in cedulas:
-                self.cedulas.append(_cedula)
-            self.arvoreDeMerkle = MerkleTree()
-            for _cedula in cedulas:
-                self.arvoreDeMerkle.update(_cedula.idCedula)
-            self.hash_raiz = self.arvoreDeMerkle.rootHash
-
-    def dados(self):
-        return "{}:{}:{}".format(self.endUrna, len(self.cedulas), self.hash_raiz)
-
-    def gerarHash(self):
-        gerador = hashing.HashMachine()
-        self.Hash = gerador.hash(self.dados())
-
-    def dicionarios(self):
-        _ds = []
-        for _c in self.cedulas:
-            _d = {"idCedula": _c.idCedula}
-            _ds.append(_d)
-
-        return {"endUrna": self.endUrna, "cedulas":_ds}
-
-    def importarDicionario(self, dicionario):
-        self.endUrna = dicionario["endUrna"]
-
-        for _d in dicionario["celulas"]:
-            _c = _Cedula
-            _c.idCedula = _d["idCelula"]
-
-    def exportarDicionario(self, arquivo):
-        _arq = open(arquivo, "w")
-        json.dump(self.dicionarios(), _arq, indent=4)
-        _arq.close()
+            self.inserir(_cedula) 

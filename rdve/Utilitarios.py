@@ -8,12 +8,12 @@ def remover_seguramente(caminho, passagens):
     arquivo.close()
         
     with open(caminho, "br+", buffering=0) as arquivo:
-        for i in range(passagens):
+        for _ in range(passagens):
             arquivo.seek(0,0)
             arquivo.write(os.urandom(tamanho))
         arquivo.seek(0)
     
-    for x in range(tamanho):
+    for _ in range(tamanho):
         arquivo.write(b'\x00')
     
     os.remove(caminho) 
