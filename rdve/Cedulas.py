@@ -20,9 +20,7 @@ class _Cedula:
 
 class Cedulas(list):
     endUrna = None
-    _saldo = None
-    arvoreDeMerkle = MerkleTree()
-    hash_raiz = None 
+    _saldo = None 
 
     @property
     def saldo(self, saldo):
@@ -46,7 +44,6 @@ class Cedulas(list):
         if isinstance(_cedula, _Cedula):
             self.append(_cedula)
             self.saldo += 1
-            self.arvoreDeMerkle.update(_cedula.idCedula)
 
     def criarCedulas(self, saldo):
         if not self.endUrna:
@@ -55,19 +52,14 @@ class Cedulas(list):
             _Cedula = _Cedula()
             _Cedula.criarCedula()
             self.inserir(_Cedula)
-        self.calcularArvoreDeMerkle()
-        self.hash_raiz = self.arvoreDeMerkle.rootHash
 
     def dicionarios(self):
-        if not self.hash_raiz:
-            self.calcularArvoreDeMerkle()
-            self.hash_raiz = self.arvoreDeMerkle.rootHash
         if len(self)>0:
             _dicionarios = []
             for _cedula in self:
                 _dicionario = {"idCedula": _cedula.idCedula}
                 _dicionarios.append(_dicionario)
-            return {"endUrna": self.endUrna, "cedulas":_dicionarios, "hash_raiz": self.hash_raiz}
+            return {"endUrna": self.endUrna, "cedulas":_dicionarios}
         else:
             return None
 
@@ -76,10 +68,6 @@ class Cedulas(list):
         for _c in self:
             _dados.append(_c.retornaIdCedula)
         
-    def calcularArvoreDeMerkle(self):
-        for _id in self._idsCedulas():
-            self.arvoreDeMerkle.update(_id)
-
     def importarDicionario(self, dicionarios):
         endUrna = dicionarios["endUrna"]
         for _dicionario in dicionarios["cedulas"]:

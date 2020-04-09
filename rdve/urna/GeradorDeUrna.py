@@ -1,9 +1,15 @@
+'''
+    Esta classe abstrai o mecanismo que gera um bloco urna. Considerando a dimensão do bloco, a abordagem 
+    adotada passou a ser um bloco por urna, ao contrário de várias urnas em um bloco. A classe exportar
+    um dicionário que pode ser exportado no objeto genérico "bloco", sem a necessidade de herança. 
+'''
+
 from rdve.Cedulas import Cedulas
 from rdve.Erros import saldoInconsistente
 from rdve.Candidato import Candidato, tCandidato
 from rdve.Eleitor import Eleitor, tEleitor
 from rdve.Utilitarios import gerarChavePublica, gerarChavePrivada, gerarEndereco, importarChavePublica
-from pymerkle import hashing
+from pymerkle import MerkleTree, hashing
 from datetime import datetime
 
 class regEleitor:
@@ -31,9 +37,11 @@ class GeradorDeUrna:
     zona = None
     secao = None
     saldoInicial = None
+    nonce = None
     timestamp = None
     endereco = None
     chavePublica = None
+    arvoreDeMerkle = MerkleTree()
     candidatos = []
     eleitores = []
     cedulas = Cedulas()
@@ -104,13 +112,23 @@ class GeradorDeUrna:
             self.endereco = gerarEndereco("tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
 
     def dados(self):
-        return "{}{}{}{}{}{}".format(self.eleicao, self.zona, self.secao, self.endereco, self.saldoInicial, self.cedulas.hash_raiz)
+        return "{}{}{}{}{}{}{}".format(self.eleicao, self.zona, self.secao, self.endereco, self.saldoInicial, self.nonce, self.arvoreDeMerkle.rootHash)
+
+    def calcularArvoreDeMerkle(self):
+        for _c in self.cedulas:
+            self.arvoreDeMerkle.update(_c)
+        for _e in self.eleitores:
+            self.arvoreDeMerkle.update(_e)
+        for _cD in self.candidatos:
+            self.arvoreDeMerkle.update(_cD)
 
     def calcularHash(self):
+        self.nonce = 0
         gerador = hashing.HashMachine()
         _hash = ''
         while not _hash.startswith('00000'):
             _hash = gerador.hash(self.dados())
+            self.nonce+=1
         return _hash
 
     def dicionario(self):
@@ -121,9 +139,10 @@ class GeradorDeUrna:
                 "secao": self.secao, 
                 "saldoInicial": self.saldoInicial,
                 "endereco": self.endereco, 
-                "timestamp": self.timestamp, 
+                "timestamp": self.timestamp,
+                "nonce": self.nonce,
+                "arvoreDeMerkle": self.arvoreDeMerkle.serialize(),
                 "cedulas": self.cedulas.dicionarios(), 
-                "hashRaiz": self.cedulas.hash_raiz, 
                 "eleitores": self.serializarEleitores(), 
                 "candidatos": self.serializarCandidatos()
                 }            
