@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from rdve.Urna import Urna, tUrna
+from rdve.Urna.GeradorDeUrna import GeradorDeUrna
 from rdve.Bloco import Bloco
 
-mUrna = Urna()
+mUrna = GeradorDeUrna()
 mBloco = Bloco()

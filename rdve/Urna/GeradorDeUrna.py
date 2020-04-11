@@ -68,7 +68,7 @@ class GeradorDeUrna:
 
     def importarEleitor(self, dEleitor_):
         if dEleitor_["tipo"] == "eleitor":
-            _e = tEleitor.importarDicionario(dEleitor_)
+            _e = tEleitor(dEleitor_["nome"], dEleitor_["titulo"], dEleitor_["endereco"], dEleitor_["timestamp"])
             self.incluirEleitor(_e)
 
     def incluirCandidato(self, candidato_):
@@ -78,7 +78,8 @@ class GeradorDeUrna:
 
     def importarCandidato(self, candidato_):
         if candidato_["tipo"] == "candidato":
-            _c = tCandidato.importarDicionario(candidato_)
+            _c = tCandidato(candidato_["abrangencia"], candidato_["nome"], candidato_["titulo"], candidato_["cargo"],
+                            candidato_["numero"], candidato_["processo"], candidato_["endereco"], candidato_["timestamp"])
             self.incluirCandidato(_c)
 
     def serializarCandidatos(self):
@@ -116,11 +117,11 @@ class GeradorDeUrna:
 
     def calcularArvoreDeMerkle(self):
         for _c in self.cedulas:
-            self.arvoreDeMerkle.update(_c)
+            self.arvoreDeMerkle.update(_c.retornaIdCedula())
         for _e in self.eleitores:
-            self.arvoreDeMerkle.update(_e)
+            self.arvoreDeMerkle.update(_e.dados())
         for _cD in self.candidatos:
-            self.arvoreDeMerkle.update(_cD)
+            self.arvoreDeMerkle.update(_cD.dados())
 
     def calcularHash(self):
         self.nonce = 0
@@ -133,7 +134,6 @@ class GeradorDeUrna:
 
     def dicionario(self):
         return {
-                "tipo": "urna", 
                 "eleicao": self.eleicao, 
                 "zona": self.zona, 
                 "secao": self.secao, 

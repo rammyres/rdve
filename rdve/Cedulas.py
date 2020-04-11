@@ -15,7 +15,7 @@ class _Cedula:
     def criarCedula(self):
         self.idCedula = uuid4()
     
-    def retornIdCedula(self):
+    def retornaIdCedula(self):
         return self.idCedula
 
 class Cedulas(list):
@@ -59,7 +59,7 @@ class Cedulas(list):
             for _cedula in self:
                 _dicionario = {"idCedula": _cedula.idCedula}
                 _dicionarios.append(_dicionario)
-            return {"endUrna": self.endUrna, "cedulas":_dicionarios}
+            return {"cedulas":_dicionarios}
         else:
             return None
 

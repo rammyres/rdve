@@ -1,77 +1,76 @@
 #!/usr/bin/env python3
 from hashlib import sha256
-from pymerkle.hashing import HashMachine
 from datetime import datetime
-from time import time
 from rdve.Erros import dataInferiorAoLimite
 import json
 
 class BlocoGenesis:
-    abrangencias = {}
-    nonce = 1
-    hashAbrangencias = None
-    _dataVotacao = None
-    Hash = None
+    nonce = 0
+    Hash = ''
+    tipo_Eleicao = None
+    alistamento_dataInicio = None
+    alistamento_dataFim = None
+    candidatura_dataInicio = None
+    candidatura_dataFim = None
+    dataVotacao = None
 
-    def __init__(self, eleicao, dataVotacao):
-        self.eleicao = eleicao # Eleicação no formado AAAATT, onde TT é o turno,
-                               # exemplo, eleição 202001
-        self.dataVotacao = dataVotacao
+    def __init__(self, eleicao, tipo_Eleicao):
+        self.tipo_Eleicao = tipo_Eleicao # Os seguintes tipos de eleições serão aceitos:
+                                         # 1 para eleição nacional (presidente, governadores, deputados e senadores, abrangencia Nacional, 
+                                         # com abrangencias nacionais e estaduais)
+                                         # 2 para eleições municipal (prefeitos e vereadores), com abrangencias municipais
+                                         # 3 para eleições extraordinarias nacionais (somente o presidente)
+                                         # 4 para eleições extraordinarias estaduais (somente o governador)
+                                         # 5 para eleições extraordinárias municipais (somente prefeito)
+        self.eleicao = eleicao # Eleicação no formado AAAA.RR, onde RR é o sequencial indicativo de regularidade. Deve ser 1 para eleição 
+                               # regular e a partir de 2 eleições extraordinárias. 
+                               # Exemplo, eleição 2020.01
 
-    @property
-    def dataVotacao(self):
-        return self._dataVotacao
+    def definirPeriodoalistamento(self, dataInicio, dataFim):
+        # A função deve ser chamada para definir o periodo de alistamento eleitoral, eleitores já existentes
+        # também deverão ser importados durante esse periodo. As datas devem ser str, no formato AAAA-MM-DD        
+        self.alistamento_dataInicio = str(datetime.strptime(dataInicio, "%Y-%m-%d"))
+        self.alistamento_dataFim = str(datetime.strptime(dataFim, "%Y-%m-%d"))
 
-    @dataVotacao.setter
-    def dataVotacao(self, dataVotacao):
-        _tDataVotacao = datetime.strptime(dataVotacao, "%Y-%m-%d")
-        if _tDataVotacao <= datetime.today():
-            raise dataInferiorAoLimite
-        self._dataVotacao = dataVotacao
+    def definirPeriodoCandidaturas(self, dataInicio, dataFim):
+        # A função deve ser chamada para definir o periodo de registro das candidaturas. 
+        # A data deve ser str, no formamto AAAA-MM-DD
+        self.candidatura_dataInicio = str(datetime.strptime(dataInicio, "%Y-%m-%d"))
+        self.alistamento_dataFim = str(datetime.strptime(dataFim, "%Y-%m-%d"))
 
     def definirDataVotacao(self, data):
-        self.dataVotacao = data
-    
-    def carregarAbrangencia(self):
-        _abr = open("abrangencias.json", "r")
-        self.abrangencias = json.load(_abr)
-        _abr.close()
-        hashAbrangencias = sha256()
-        tamanho = 65536
-        with open("abrangencias.json", "rb") as _abr:
-            _abr_b = _abr.read(tamanho)
-            while len(_abr_b)>0:
-                hashAbrangencias.update(_abr_b)
-                _abr_b = _abr.read(tamanho)
-        self.hashAbrangencias = hashAbrangencias.hexdigest()
+        # Define a data da votação do primeiro turno, um bloco de criação de segundo turno conterá
+        # outra data para o segundo turno
+        self.dataVotacao = str(datetime.strptime(data, "%Y-%m-%d"))
 
     def dados(self):
-        return "Genesis:{}:{}:{}:{}:{}".format(self.eleicao, self.dataVotacao, self.hashAbrangencias, self.hashAbrangencias, self.nonce)
+        # Retorna os dados de identificação do block genesis, principalmente para calculo do hash
+        return "Genesis:{}:{}:{}:{}:{}:{}:{}:{}".format(self.tipo_Eleicao, self.eleicao, self.nonce, self.alistamento_dataInicio,
+                                               self.alistamento_dataFim, self.candidatura_dataInicio, self.candidatura_dataFim,
+                                               self.dataVotacao)
 
     def criarHash(self):
-        gerardorDeHash = HashMachine()
+        # Calcula o hash do bloco, usando os dados e o nonce. O hash tem dificuldade 
         _hash = ''
-        _hora_inicial = time()
-        animation = "|/-\\"
-        idx = 0
-        print("Calculando hash do bloco gênesis")
         while not _hash.startswith('00000'):
-            print("{} - Tentativa {} - Tempo gasto: {:.2f}s".format(animation[idx % len(animation)], self.nonce, time()-_hora_inicial), end="\r")
-            _hash = gerardorDeHash.hash(self.dados().encode()).decode()
-            idx += 1
+            _hash = sha256(self.dados().encode()).hexdigest()
             self.nonce += 1
-        print("{} - {}\nTempo gasto: {:.2f}s".format(self.nonce, _hash, time()-_hora_inicial))
-        self.Hash = _hash
+        self.Hash = '0x{}'.format(_hash)
 
     def dicionario(self):
-        _dicionario = {"index": "0", "tipo":"Genesis",
-                        "bloco":{"eleicao": self.eleicao, 
-                                  "abrangencias":self.abrangencias,
-                                  "hashAbrangencias": self.hashAbrangencias,
-                                  "dataVotacao": self.dataVotacao, 
-                                  "nonce": self.nonce,
-                                  "hash": self.Hash}
-                                  }
+        # Retorna o bloco Gênesis serializado
+        _dicionario = {"index": "0", 
+                       "tipo":"Genesis",
+                       "tipo_eleicao": self.tipo_Eleicao, 
+                       "eleicao": self.eleicao, 
+                       "nonce": self.nonce, 
+                       "alistamento_dataInicio": self.alistamento_dataInicio,
+                       "alistamento_dataFim": self.alistamento_dataFim, 
+                       "candidatura_dataInicio": self.candidatura_dataInicio, 
+                       "cadidatura_dataFim": self.candidatura_dataFim,
+                       "dataVotacao": self.dataVotacao,
+                       "hash": self.Hash
+                      }
         return _dicionario
 
     def criarBlocoGenesis(self):
