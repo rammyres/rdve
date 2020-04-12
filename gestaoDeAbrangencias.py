@@ -1,79 +1,8 @@
 #!/usr/bin/env python3
 from colorama import init, Fore, Back, Style
 from collections import OrderedDict
+from rdve.Abrangencias import BlocoAbrangencias
 import json, colorama, copy
-
-class abrangencias(OrderedDict):
-    def __init__(self):
-        self.update({"1":"BRASIL"})
-        self.ultMun = 0
-        self.ultEst = 0
-
-    def ordenarPorChave(self):
-        _tmp = OrderedDict(sorted(self.items()))
-        self.clear()
-        self.update(_tmp)
-
-    def listarEstados(self):
-        est = OrderedDict({"Estado":"Nome"})
-        if len(est) == 0:
-            return None
-        for k in self.keys():
-            if k.startswith("3"):
-                _d = {k[-2:]: self[k]}
-                est.update(_d)
-        return est
-
-    def listarMunicipios(self):
-        mun = OrderedDict()
-        for k in self.keys():
-            if k.startswith("5"):
-                mun.update(str(k), self[k])
-        return mun
-
-    def inserir(self, tipo, nome, estado = None):
-        nome = str.upper(nome)
-        if tipo == "3":
-            self.ultEst += 1
-            self.update({"3{:0>2d}".format(self.ultEst):nome})
-        if tipo == "5" and estado != None:
-            self.ultMun += 1
-            self.update({"5{:0>2d}{:0>3d}".format(estado, self.ultMun):nome})
-        elif tipo == "5" and estado != None:
-            return False
-        self.ordenarPorChave()
-        self.exportarJson()
-        return True
-
-    def importarJson(self):
-        try:
-            _arq = open("abrangencias.json", "r")
-            _dict = json.load(_arq)
-
-            for k in _dict.keys():
-                if k.startswith("3"):
-                    self.ultEst += 1
-                elif k.startswith("5"):
-                    self.ultMun += 1
-                self.update({k:str.upper(_dict[k])})
-
-            _arq.close()
-            return True
-        
-        except IOError:
-            return False
-        
-    def exportarJson(self):
-        _arq = open("abrangencias.json", "w")
-        json.dump(self, _arq, indent=4)
-        _arq.close()
-
-    def listarAbrangencias(self):
-        if len(self) == 0:
-            print("Não existem abrangências cadastradas ")
-        else:
-            for k in self.keys():
-                print("{} - {}".format(k, self[k]))
 
         
 def menu():
@@ -87,7 +16,7 @@ def menu():
     else:
         print(f"{Fore.RED}{Style.BRIGHT}Escolha uma opção válida")
 
-abrNacional = abrangencias()
+bAbrangencias = BlocoAbrangencias("1", "2020-1")
 
 def listarEstados():
        
