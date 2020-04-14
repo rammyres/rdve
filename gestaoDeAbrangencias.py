@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 from colorama import init, Fore, Back, Style
 from collections import OrderedDict
-from rdve.Abrangencias import BlocoAbrangencias
+from rdve.Abrangencias import RegistroAbrangencias
 import json, colorama, copy
 
+abrNacional = RegistroAbrangencias(1, "2020-1")
         
 def menu():
     print(f"{Fore.BLUE}Escolha uma opção")
@@ -16,29 +17,38 @@ def menu():
     else:
         print(f"{Fore.RED}{Style.BRIGHT}Escolha uma opção válida")
 
-bAbrangencias = BlocoAbrangencias("1", "2020-1")
-
-def listarEstados():
-       
-    if abrNacional.listarEstados() == None:
-        print("Não existem estados cadastrados")
-        return False
-    else:
-        for k in abrNacional.listarEstados().keys():
-            print("{} - {}".format(k, abrNacional.listarEstados()[k]))
-    return True
+def listarAbrangencias(tipo, UF = None):
+    if UF and UF not in abrNacional.listarAbrangencias(tipo, UF).keys():
+        print("Estado não localizado")
+    for x in abrNacional.listarAbrangencias(tipo, UF):
+        print(x)
 
 if __name__ == "__main__":
     init(autoreset=True)
     
     print(f"{Fore.BLUE}Bem vindo ao gestão de abrangencias")
-    abrNacional.importarJson()
+    try:
+        abrNacional.importarAbrangencias("abrangencias.json")
+    except IOError:
+        print(f"{Fore.RED}{Back.YELLOW}Abrangencias não localizadas")
 
     while True:
         op = menu()
         
         if op == "1":
-            abrNacional.listarAbrangencias()
+
+            while True:
+                _e = str.upper(input("Digite uma das opções abaixo:\n\
+                                      E para lista abrangências estaduais\n\
+                                      M para municipios
+                                      : "))
+                if _e == "E" or _e == "M":
+                    listarAbrangencias(1)
+                    if _e == "M":                        
+                        _m = str.upper(input("Digite a sigla do estado: "))
+                        listarAbrangencias(2, _m)
+                    break                
+
         elif op == "2":
             _ab = input("Informe o tipo de abrangência (M para municipal, E para estadual): ")
             if str.upper(_ab) == "M":
