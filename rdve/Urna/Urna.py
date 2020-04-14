@@ -53,7 +53,7 @@ class Urna:
 
     def criarTransacao(self):
         if self.endereco:
-            self.tUrna = tUrna(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.cedulas, self.cedulas.hash_raiz, self.timestamp, self.endereco)
+            self.tUrna = tUrna(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.cedulas, self.timestamp, self.endereco)
 
     def dados(self):
         return(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
@@ -111,8 +111,7 @@ class Urna:
 
     def exportarDicionario(self):
         _dicionario = {"zona": self.zona, "secao": self.secao, "saldoInicial": self.saldoInicial, "votos": self.votosAProcessar,
-                        "timestamp": self.timestamp, "endereco": self.endereco, "hashRaiz": self.cedulas.hash_raiz, 
-                        "cedulas": self.cedulas.dicionarios()}
+                        "timestamp": self.timestamp, "endereco": self.endereco,"cedulas": self.cedulas.dicionarios()}
         return _dicionario
     
     def __key(self):

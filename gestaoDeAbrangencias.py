@@ -4,7 +4,7 @@ from collections import OrderedDict
 from rdve.Abrangencias import RegistroAbrangencias
 import json, colorama, copy
 
-abrNacional = RegistroAbrangencias(1, "2020-1")
+abrNacional = RegistroAbrangencias()
         
 def menu():
     print(f"{Fore.BLUE}Escolha uma opção")
@@ -40,8 +40,10 @@ if __name__ == "__main__":
             while True:
                 _e = str.upper(input("Digite uma das opções abaixo:\n\
                                       E para lista abrangências estaduais\n\
-                                      M para municipios
-                                      : "))
+                                      M para municipios\n\
+                                      Z para zonas\n\
+                                      S para seções\n\
+                                      digite sua opção: "))
                 if _e == "E" or _e == "M":
                     listarAbrangencias(1)
                     if _e == "M":                        
