@@ -39,9 +39,13 @@ class abrNacional:
         self.id = "BR"
         self.nome = "BRASIL"
 
-    def incluirAbrEstadual(self, abrangenciaEstadual):
+    def inserirAbrEstadual(self, abrangenciaEstadual):
         if isinstance(abrangenciaEstadual, abrEstadual):
             self.abrEstaduais.append(abrangenciaEstadual)
+    
+    def incluirAbrEstadual(self, nome, uf):
+        _tAbrEstadual = abrEstadual(nome, uf)
+        self.inserirAbrEstadual(_tAbrEstadual)
         
     def serializar(self):
         _dicionarios = []
@@ -49,14 +53,14 @@ class abrNacional:
             _dicionarios.append(_e.serializar())
         return {"BR":"BRASIL", "abrEstaduais": _dicionarios}
 
-class abrEstadual(OrderedDict):
+class abrEstadual:
     zonas = []
     abrMunicipais = []
     seqM = 1
 
     def __init__(self, nome, uf):
-        self.uf = uf 
-        self.nome = nome
+        self.uf = str.upper(uf)
+        self.nome = str.upper(nome)
 
     def incluirZona(self, numero):
         _zona = Zona(self.uf, numero)
@@ -106,7 +110,7 @@ class abrMunicipal:
 
     def __init__(self, uf, sequencial, nome):
         self.idMunicipio = "{}M{:04d}".format(uf,sequencial)
-        self.nome = nome
+        self.nome = str.upper(nome)
 
     def incluirSecao(self, secao_):
         if isinstance(secao_, Secao):
@@ -126,26 +130,34 @@ class abrMunicipal:
 
 class RegistroAbrangencias:
     def __init__(self):
-        self.abrNacional_ = abrNacional()
+        self.abrNacional = abrNacional()
 
     def exportarAbrangencias(self, arquivo):
         _arq = open(arquivo, "w")
 
-        json.dump({"registro_abrangencias": self.abrNacional_.serializar()}, _arq, indent=4)
+        json.dump({"registro_abrangencias": self.abrNacional.serializar()}, _arq, indent=4)
 
         _arq.close()
 
     def listarAbrangencias(self, tipo, UF = None):
         _tAbr = []
-        if tipo == 1:
-            for _abr in self.abrNacional_.abrEstaduais:
+        if tipo == 1: # Retorna uma lista de abrangências estaduais
+            for _abr in self.abrNacional.abrEstaduais:
                 _t = {"UF": _abr.uf, "nome": _abr.nome}
                 _tAbr.append(_t)
-        if tipo == 2 and UF:
-            for _abrE in self.abrNacional_.abrEstaduais:
-                if _abrE["UF"] == UF:
-                    _tAbr = [{"ID Municipio": _abrM.idMunicipio, "Nome": _abrM.nome} 
-                            for _abrM in self.abrNacional_.abrEstaduais if _abrM.idMunicipio[:2] == UF]
+        if tipo == 2 and UF: # Retorna uma lista das abrangnencias municipais existentes
+                             # na UF apontada
+            for _abrE in self.abrNacional.abrEstaduais:
+                if _abrE.uf == UF: 
+                    for _abrM in _abrE.abrMunicipais:
+                        _tAbr.append({"ID Municipio": _abrM.idMuncipio, "Nome": _abrM.nome})
+        if tipo == 3 and UF: #Retorna as zonas existentes na UF apontada
+            for _abrE in self.abrNacional.abrEstaduais:
+                if _abrE.uf == UF:
+                    for _abrZ in _abrE:
+                        _tAbr.append({"ID Zona": _abrZ.idZona, "Numero": _abrZ.numero})
+
+        return _tAbr
 
     def importarAbrangencias(self, arquivo):
         _arq = open(arquivo, "r")
@@ -154,10 +166,7 @@ class RegistroAbrangencias:
 
         _arq.close()
 
-        self.tipo_deEleicao = dicionarios["tipo_deEleicao"]
-        self.eleicao = dicionarios["eleicao"]
-        
-        for _dE in dicionarios["bloco_abrangencias"]:
+        for _dE in dicionarios["registro_abrangencias"]["abrEstaduais"]:
             _tAbrEstadual = abrEstadual(_dE["estado"], _dE["abrEstadual"])
 
             for _dZ in _dE["zonas"]:
@@ -176,4 +185,4 @@ class RegistroAbrangencias:
                     _tAbrMunicipal.incluirSecao(_tSecao)
                 _tAbrEstadual.incluirAbrMunicipal(_tAbrMunicipal)
             
-            self.abrNacional_.incluirAbrEstadual(_tAbrEstadual)
+            self.abrNacional.inserirAbrEstadual(_tAbrEstadual)

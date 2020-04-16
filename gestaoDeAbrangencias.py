@@ -4,12 +4,12 @@ from collections import OrderedDict
 from rdve.Abrangencias import RegistroAbrangencias
 import json, colorama, copy
 
-abrNacional = RegistroAbrangencias()
+Reg = RegistroAbrangencias()
         
 def menu():
     print(f"{Fore.BLUE}Escolha uma opção")
-    print("1- Listar abrangencias existentes ")
-    print("2- Cadastrar nova abrangência ")
+    print("1- Cadastrar nova abrangência ")
+    print("2- Listar abrangencias estaduais ")
     print("9- Encerrar")
     _escolha = str(input("Escolha sua opção: "))
     if _escolha == "1" or _escolha == "2" or _escolha == "9":
@@ -18,54 +18,51 @@ def menu():
         print(f"{Fore.RED}{Style.BRIGHT}Escolha uma opção válida")
 
 def listarAbrangencias(tipo, UF = None):
-    if UF and UF not in abrNacional.listarAbrangencias(tipo, UF).keys():
-        print("Estado não localizado")
-    for x in abrNacional.listarAbrangencias(tipo, UF):
-        print(x)
+    lista = Reg.listarAbrangencias(tipo, UF)
+    if not lista: 
+        return -1
+    if UF:
+        for i in lista:
+            if tipo == 2:
+                print("{} - {}".format(i["ID Municipio"], i["Nome"]))
+            if tipo == 3:
+                print("{} - {}".format(i["ID Zona"], i["Numero"]))
+    elif tipo == 1:
+        print("UF - Estado")
+        for i in lista:
+            print("{} - {}".format(i["UF"], i["nome"]))
+    return 1
+    
 
 if __name__ == "__main__":
     init(autoreset=True)
     
     print(f"{Fore.BLUE}Bem vindo ao gestão de abrangencias")
     try:
-        abrNacional.importarAbrangencias("abrangencias.json")
+        Reg.importarAbrangencias("abrangencias.json")
     except IOError:
-        print(f"{Fore.RED}{Back.YELLOW}Abrangencias não localizadas")
+        print(f"{Fore.RED}{Back.CYAN}{Style.BRIGHT}Abrangencias não localizadas")
 
     while True:
         op = menu()
         
         if op == "1":
-
             while True:
-                _e = str.upper(input("Digite uma das opções abaixo:\n\
-                                      E para lista abrangências estaduais\n\
-                                      M para municipios\n\
-                                      Z para zonas\n\
-                                      S para seções\n\
-                                      digite sua opção: "))
-                if _e == "E" or _e == "M":
-                    listarAbrangencias(1)
-                    if _e == "M":                        
+                _e = str.upper(input("Digite uma das opções abaixo:\nE para lista abrangências estaduais\nM para municipios\nZ para zonas\nS para seções\ndigite sua opção: "))
+                if _e == "E" or _e == "M" or _e == "Z" or _e == "S":
+                    if _e == "E":
+                        _nE = input("Digite o nome do estado: ")
+                        _uf = input("Digite oa sigla do estado: ")
+                        Reg.abrNacional.incluirAbrEstadual(_nE, _uf)
+                        Reg.exportarAbrangencias("abrangencias.json")
+                    if _e == "M" or _e == "S" or _e == "Z" and listarAbrangencias(1)<0:
+                        print(f"{Fore.RED}Sua lista não possui abragências estaduais\nVocê precisa de estados para incluir zonas ou municípios")
+                    
+                    if _e == "M":                      
                         _m = str.upper(input("Digite a sigla do estado: "))
                         listarAbrangencias(2, _m)
                     break                
-
-        elif op == "2":
-            _ab = input("Informe o tipo de abrangência (M para municipal, E para estadual): ")
-            if str.upper(_ab) == "M":
-                while True:
-                    print("Selecione a qual estado pertence o município: ")
-                    if not listarEstados():
-                        break
-                    e = input("Numero do estado: ")
-                    _ab_n = input("Informe o nome da abrangência: ")
-                    abrNacional.inserir("5", _ab_n, int(e))
-                    break
-            elif str.upper(_ab) == "E":
-                _ab_n = input("Informe o nome da abrangência: ")
-                abrNacional.inserir("3", _ab_n)
-            elif str.upper(_ab) != "E" and str.upper(_ab) != "M":
-                print("Opção invalida, digite M ou E")
+        if op == "2":
+            listarAbrangencias(1)
         elif op == "9":
             break
