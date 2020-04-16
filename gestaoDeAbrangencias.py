@@ -51,16 +51,20 @@ if __name__ == "__main__":
                 _e = str.upper(input("Digite uma das opções abaixo:\nE para lista abrangências estaduais\nM para municipios\nZ para zonas\nS para seções\ndigite sua opção: "))
                 if _e == "E" or _e == "M" or _e == "Z" or _e == "S":
                     if _e == "E":
-                        _nE = input("Digite o nome do estado: ")
+                        _nE = input("Digite o nome do estado (sem acentos): ")
                         _uf = input("Digite oa sigla do estado: ")
                         Reg.abrNacional.incluirAbrEstadual(_nE, _uf)
                         Reg.exportarAbrangencias("abrangencias.json")
-                    if _e == "M" or _e == "S" or _e == "Z" and listarAbrangencias(1)<0:
-                        print(f"{Fore.RED}Sua lista não possui abragências estaduais\nVocê precisa de estados para incluir zonas ou municípios")
+                    if _e == "M" or _e == "S" or _e == "Z":
+                        _t = listarAbrangencias(1)
+                        if _t == -1:
+                            print(f"{Fore.RED}Sua lista não possui abragências estaduais\nVocê precisa de estados para incluir zonas ou municípios")
                     
-                    if _e == "M":                      
-                        _m = str.upper(input("Digite a sigla do estado: "))
-                        listarAbrangencias(2, _m)
+                        elif _e == "M":                      
+                            _uf = str.upper(input("Digite a sigla do estado: "))
+                            _nM = input("Digite o nome do município (sem acentos): ")
+                            _abrM = Reg.abrNacional.abrEstaduais[Reg.abrNacional.indexEstadoPorUF(_uf)].incluirAbrMunicipal(_nM)
+                            Reg.exportarAbrangencias("abrangencias.json")
                     break                
         if op == "2":
             listarAbrangencias(1)

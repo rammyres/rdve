@@ -46,6 +46,11 @@ class abrNacional:
     def incluirAbrEstadual(self, nome, uf):
         _tAbrEstadual = abrEstadual(nome, uf)
         self.inserirAbrEstadual(_tAbrEstadual)
+
+    def indexEstadoPorUF(self, uf):
+        for x in range(len(self.abrEstaduais)):
+            if self.abrEstaduais[x].uf == uf:
+                return x
         
     def serializar(self):
         _dicionarios = []
@@ -98,9 +103,10 @@ class abrEstadual:
         _dicionariosM = []
         for _z in self.zonas:
             if _z.idZona.startswith(self.uf):
-                _dicionariosZ.append(_z.dicionario())
+                _dicionariosZ.append(_z.serializar())
         for _abrM in self.abrMunicipais:
-            _dicionariosM.append(_abrM.dicionario())
+            if _abrM.idMunicipio.startswith(self.uf):
+                _dicionariosM.append(_abrM.serializar())
         return {"abrEstadual": self.uf, "estado": self.nome, "zonas": _dicionariosZ, "abrMunicipais": _dicionariosM}
 
 
