@@ -16,7 +16,7 @@ class Zona:
     secoes = []
     def __init__(self, uf, numero):
         self.uf = uf
-        self.idZona = "{}Z{:04d}".format(uf, numero)
+        self.idZona = "{}Z{:04d}".format(uf, int(numero))
         self.seqS = 1
         
     def inserirSecao(self, secao_):
@@ -67,9 +67,14 @@ class abrEstadual:
         self.uf = str.upper(uf)
         self.nome = str.upper(nome)
 
+    def inserirZona(self, zona_):
+        if isinstance(zona_, Zona):
+            self.zonas.append(zona_)
+    
     def incluirZona(self, numero):
         _zona = Zona(self.uf, numero)
         self.zonas.append(_zona)
+
 
     def inserirAbrMunicipal(self, abrMunicipal_):
         if isinstance(abrMunicipal_, abrMunicipal):
@@ -115,10 +120,10 @@ class abrMunicipal:
     seqS = 1
 
     def __init__(self, uf, sequencial, nome):
-        self.idMunicipio = "{}M{:04d}".format(uf,sequencial)
+        self.idMunicipio = "{}M{:04d}".format(uf, int(sequencial))
         self.nome = str.upper(nome)
 
-    def incluirSecao(self, secao_):
+    def inserirSecao(self, secao_):
         if isinstance(secao_, Secao):
             self.secoes.append(secao_)
 
@@ -132,7 +137,7 @@ class abrMunicipal:
         _dicionarios = []
         for _secao in self.secoes:
             _dicionarios.append(_secao.serializar())
-        return {"abrMunicipal": self.idMunicipio, "nome": self.nome, "secoes": _dicionarios}
+        return {"idMunicipio": self.idMunicipio, "nome": self.nome, "secoes": _dicionarios}
 
 class RegistroAbrangencias:
     def __init__(self):
@@ -156,12 +161,14 @@ class RegistroAbrangencias:
             for _abrE in self.abrNacional.abrEstaduais:
                 if _abrE.uf == UF: 
                     for _abrM in _abrE.abrMunicipais:
-                        _tAbr.append({"ID Municipio": _abrM.idMuncipio, "Nome": _abrM.nome})
+                        if _abrM.idMunicipio[:2] == UF:
+                            _tAbr.append({"ID Municipio": _abrM.idMunicipio, "Nome": _abrM.nome})
         if tipo == 3 and UF: #Retorna as zonas existentes na UF apontada
             for _abrE in self.abrNacional.abrEstaduais:
                 if _abrE.uf == UF:
                     for _abrZ in _abrE:
-                        _tAbr.append({"ID Zona": _abrZ.idZona, "Numero": _abrZ.numero})
+                        if _abrZ[:2] == UF:
+                            _tAbr.append({"ID Zona": _abrZ.idZona, "Numero": _abrZ.numero})
 
         return _tAbr
 
@@ -177,18 +184,18 @@ class RegistroAbrangencias:
 
             for _dZ in _dE["zonas"]:
                 _tZona = Zona(_dZ["idZona"][:2], _dZ["idZona"][-4:])
-
                 for _dS in _dZ["secoes"]:
                     _tSecao =  Secao(_dS["idSecao"][:6], _dS["idSecao"][-4:], _dS["nome"])
                     _tZona.inserirSecao(_tSecao)
-
-                _tAbrEstadual.incluirZona(_tZona)
+                _tAbrEstadual.inserirZona(_tZona)
 
             for _dAM in _dE["abrMunicipais"]:
-                _tAbrMunicipal = abrMunicipal(_dAM["idMunicipio"][:2], _dAM["idMunicipio"][-4:], _dAM["nome"])
-                for _dS in _dAM["secoes"]:
-                    _tSecao =  Secao(_dS["idSecao"][:6], _dS["idSecao"][-4:], _dS["nome"])
-                    _tAbrMunicipal.incluirSecao(_tSecao)
-                _tAbrEstadual.incluirAbrMunicipal(_tAbrMunicipal)
+                if _dAM["idMunicipio"][:2] == _tAbrEstadual.uf:
+                    print("{} - {}".format(_dAM["idMunicipio"][:2], _tAbrEstadual.uf))
+                    _tAbrMunicipal = abrMunicipal(_dAM["idMunicipio"][:2], _dAM["idMunicipio"][-4:], _dAM["nome"])
+                    for _dS in _dAM["secoes"]:
+                        _tSecao =  Secao(_dS["idSecao"][:6], _dS["idSecao"][-4:], _dS["nome"])
+                        _tAbrMunicipal.inserirSecao(_tSecao)
+                    _tAbrEstadual.inserirAbrMunicipal(_tAbrMunicipal)
             
             self.abrNacional.inserirAbrEstadual(_tAbrEstadual)

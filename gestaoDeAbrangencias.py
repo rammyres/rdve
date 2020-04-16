@@ -10,9 +10,11 @@ def menu():
     print(f"{Fore.BLUE}Escolha uma opção")
     print("1- Cadastrar nova abrangência ")
     print("2- Listar abrangencias estaduais ")
+    print("3- Listar abrangencias municipais de um estado ")
+    print("Deb - imprimir o arquivo bruto ")
     print("9- Encerrar")
     _escolha = str(input("Escolha sua opção: "))
-    if _escolha == "1" or _escolha == "2" or _escolha == "9":
+    if _escolha == "1" or _escolha == "2" or _escolha == "3" or _escolha == "Deb" or _escolha == "9":
         return _escolha
     else:
         print(f"{Fore.RED}{Style.BRIGHT}Escolha uma opção válida")
@@ -66,7 +68,14 @@ if __name__ == "__main__":
                             _abrM = Reg.abrNacional.abrEstaduais[Reg.abrNacional.indexEstadoPorUF(_uf)].incluirAbrMunicipal(_nM)
                             Reg.exportarAbrangencias("abrangencias.json")
                     break                
-        if op == "2":
+        elif op == "2":
             listarAbrangencias(1)
+        elif op == "3":
+            listarAbrangencias(1)
+            _abrE = str.upper(input("Digite a sigla do estado para listar as abrangências municipais: "))
+            listarAbrangencias(2, _abrE)
+
+        elif op == "Deb":
+            print(Reg.abrNacional.serializar())
         elif op == "9":
             break
