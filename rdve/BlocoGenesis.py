@@ -2,11 +2,15 @@
 from hashlib import sha256
 from datetime import datetime
 from rdve.Erros import dataInferiorAoLimite
+from Abrangencias import RegistroAbrangencias
+from Utilitarios import hashArquivo
 import json
 
 class BlocoGenesis:
     nonce = 0
     Hash = ''
+    abrangencias = RegistroAbrangencias()
+    hashAbrangencias = None
     tipo_Eleicao = None
     alistamento_dataInicio = None
     alistamento_dataFim = None
@@ -25,6 +29,15 @@ class BlocoGenesis:
         self.eleicao = eleicao # Eleicação no formado AAAA.RR, onde RR é o sequencial indicativo de regularidade. Deve ser 1 para eleição 
                                # regular e a partir de 2 eleições extraordinárias. 
                                # Exemplo, eleição 2020.01
+
+    def importarAbrangencias(self, arquivo):
+        try:
+            self.abrangencias.importarAbrangencias(arquivo)
+            self.hashAbrangencias = hashArquivo(arquivo)
+        except IOError:
+            print("O arquivo de abrangências não existe. Um arquivo com as abrangências da eleição válido deve"\
+                   "estar presente para gerar o blocogenesis")
+
 
     def definirPeriodoalistamento(self, dataInicio, dataFim):
         # A função deve ser chamada para definir o periodo de alistamento eleitoral, eleitores já existentes
@@ -45,9 +58,10 @@ class BlocoGenesis:
 
     def dados(self):
         # Retorna os dados de identificação do block genesis, principalmente para calculo do hash
-        return "Genesis:{}:{}:{}:{}:{}:{}:{}:{}".format(self.tipo_Eleicao, self.eleicao, self.nonce, self.alistamento_dataInicio,
-                                               self.alistamento_dataFim, self.candidatura_dataInicio, self.candidatura_dataFim,
-                                               self.dataVotacao)
+        return "Genesis:{}:{}:{}:{}:{}:{}:{}:{}:{}".format(self.tipo_Eleicao, self.eleicao, self.nonce, self.hashAbrangencias, 
+                                                        self.alistamento_dataInicio, self.alistamento_dataFim, 
+                                                        self.candidatura_dataInicio, self.candidatura_dataFim,
+                                                        self.dataVotacao)
 
     def criarHash(self):
         # Calcula o hash do bloco, usando os dados e o nonce. O hash tem dificuldade 
@@ -63,13 +77,15 @@ class BlocoGenesis:
                        "tipo":"Genesis",
                        "tipo_eleicao": self.tipo_Eleicao, 
                        "eleicao": self.eleicao, 
-                       "nonce": self.nonce, 
+                       "nonce": self.nonce,
+                       "hashAbrangencias": self.hashAbrangencias,
                        "alistamento_dataInicio": self.alistamento_dataInicio,
                        "alistamento_dataFim": self.alistamento_dataFim, 
                        "candidatura_dataInicio": self.candidatura_dataInicio, 
                        "cadidatura_dataFim": self.candidatura_dataFim,
                        "dataVotacao": self.dataVotacao,
-                       "hash": self.Hash
+                       "hash": self.Hash,
+                       "registro_abrangencias": self.abrangencias.abrNacional.serializar()
                       }
         return _dicionario
 

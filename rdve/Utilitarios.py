@@ -1,6 +1,19 @@
 import codecs, os, ecdsa, base58, binascii, hashlib
 from ecdsa import SigningKey, VerifyingKey, curves, SECP256k1
 
+def hashArquivo(arquivo):
+    tamanho = 65536
+    calculador = hashlib.sha256()
+    
+    _arq = open(arquivo, "rb")
+
+    tmp = _arq.read(tamanho)
+    while len(tmp)>0:
+        calculador.update(tmp)
+        tmp = _arq.read(tamanho)
+    _arq.close()
+
+    return calculador.hexdigest()
 
 def remover_seguramente(caminho, passagens):
     with open(caminho, "ba+", buffering=0) as arquivo:
