@@ -61,4 +61,7 @@ class enderecoDaUrnaNulo(Exception):
 
 class hashDoBlocoDeCedulasInvalido(Exception):
     message = "Há uma divergência entre algum dos hashes computados e persistidos"
+
+class abragenciaDuplicada(Exception):
+    message = "Não pode haver inclusão de abrangências com o mesmo número ou nome"
         
