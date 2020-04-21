@@ -33,7 +33,7 @@ class regCandidato:
 
 class GeradorDeUrna:
     eleicao = None
-    abrangencia = None
+    idSecao = None
     zona = None
     secao = None
     saldoInicial = None

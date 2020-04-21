@@ -64,4 +64,7 @@ class hashDoBlocoDeCedulasInvalido(Exception):
 
 class abragenciaDuplicada(Exception):
     message = "Não pode haver inclusão de abrangências com o mesmo número ou nome"
+
+class abrangenciaInvalida(Exception):
+    message = "Houve tentativa de insersão de uma abrangência não existe na lista de abrangências válidas"
         

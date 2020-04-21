@@ -162,7 +162,9 @@ class abrEstadual:
         try:            
             self.zonas.pop(self.indexZonaPorId(id))
             return True
-        except IndexError:
+        except IndexError: # Na possibilidade de receber um indice inválido na lista, retorna erro
+            return False
+        except TypeError: # Na possibilidade de nãp localizar (o metodo indexZonaPorId retornar None), o método retorna falso
             return False
     
     def validarMunicipio(self, abrMunicipal_):
