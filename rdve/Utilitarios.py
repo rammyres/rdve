@@ -1,4 +1,4 @@
-import codecs, os, ecdsa, base58, binascii, hashlib
+import codecs, os, ecdsa, base58, binascii, hashlib, io, qrcode
 from ecdsa import SigningKey, VerifyingKey, curves, SECP256k1
 
 def hashArquivo(arquivo):
@@ -31,44 +31,67 @@ def remover_seguramente(caminho, passagens):
     
     os.remove(caminho) 
 
-def gerarChavePrivada(arquivo):
+def gerarChavePrivada():
     _chavePrivada = os.urandom(32)
     _sk = ecdsa.SigningKey.from_string(_chavePrivada, curve=ecdsa.SECP256k1)
+    return _sk
+
+def exportarChavePrivada(chave, arquivo):
     _arq = open(arquivo, "wb")
-    _arq.write(_sk.to_pem())
+    _arq.write(chave.to_pem())
     _arq.close()
 
-def gerarChavePublica(arquivo):
+def gerarChavePublica(chavePrivada):
+    if isinstance(chavePrivada, io.IOBase):
+        _arq = open(chavePrivada, "rb")
+        _sk = SigningKey.from_pem(_arq.read())
+    elif isinstance(chavePrivada, str):
+        _sk = SigningKey.from_pem(bytearray.fromhex(chavePrivada))
+    _vk = _sk.verifying_key
+    return _vk
+    
+def exportarChavePublica(chavePublica, arquivo):
     try:
         _arq = open(arquivo, "rb")
-        chavePrivada = SigningKey.from_pem(_arq.read())
-        chavePublica = chavePrivada.verifying_key
-        return chavePublica
     except IOError:
         print("Arquivo inexistente")
     finally:
         _arq.close()
 
-def importarChavePrivada(arquivo):
+def importarChavePrivada(chave):
     try:
-        _arq = open(arquivo, "rb")
-        chavePrivada = SigningKey.from_pem(_arq.read())
+        if isinstance(chave, io.IOBase):
+            _arq = open(chave, "rb")
+            chavePrivada = SigningKey.from_pem(_arq.read())
+        elif isinstance(chave, str):
+            chavePrivada = SigningKey.from_string(bytearray.fromhex(chave))
         return chavePrivada
     except IOError:
         print("Arquivo inexistente")
     finally:
         _arq.close()
 
-def importarChavePublica(arquivo):
+def importarChavePublica(chave):
     try:
-        _arq = open(arquivo, "rb")
-        chavePublica = VerifyingKey.from_pem(_arq.read())
+        if isinstance(chave, io.IOBase):
+            _arq = open(chave, "rb")
+            chavePublica = VerifyingKey.from_pem(_arq.read())
+        elif isinstance(chave, str):
+            chavePublica = VerifyingKey.from_string(bytearray.fromhex(chave))
         return chavePublica
     except IOError:
         print("Arquivo inexistente")
     finally:
         _arq.close()
 
+def exportarChaveQRCode(chave, arquivo):
+    if isinstance(chave, io.IOBase):
+        _arq = open(chave)
+        img = qrcode.make(_arq.read())
+    else:
+        img = qrcode.make(chave.to_pem().decode())
+    img.save(arquivo)
+   
 def ripemd160(x):
     d = hashlib.new('ripemd160')
     d.update(x)

@@ -8,7 +8,7 @@ from rdve.Cedulas import Cedulas
 from rdve.Erros import saldoInconsistente
 from rdve.Candidato import Candidato, tCandidato
 from rdve.Eleitor import Eleitor, tEleitor
-from rdve.Utilitarios import gerarChavePublica, gerarChavePrivada, gerarEndereco, importarChavePublica
+from rdve.Utilitarios import gerarChavePublica, gerarChavePrivada, gerarEndereco, importarChavePrivada, importarChavePublica, exportarChavePrivada, exportarChavePublica
 from pymerkle import MerkleTree, hashing
 from datetime import datetime
 
@@ -101,11 +101,10 @@ class GeradorDeUrna:
         else:
             raise saldoInconsistente
 
-    def gerarChavePrivada(self):
-        gerarChavePrivada("tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
-
-    def gerarChavePublica(self):
-        gerarChavePublica("tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
+    def gerarChaves(self):
+        exportarChavePrivada(gerarChavePrivada(), "tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
+        _sk = importarChavePrivada("tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
+        gerarChavePublica(_sk)
         self.chavePublica = importarChavePublica("tmp/PubUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
 
     def gerarEndereco(self):
@@ -132,7 +131,7 @@ class GeradorDeUrna:
             self.nonce+=1
         return _hash
 
-    def dicionario(self):
+    def serializar(self):
         return {
                 "eleicao": self.eleicao, 
                 "zona": self.zona, 
