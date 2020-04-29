@@ -1,5 +1,7 @@
 import codecs, os, ecdsa, base58, binascii, hashlib, io, qrcode
 from ecdsa import SigningKey, VerifyingKey, curves, SECP256k1
+from Cryptodome.Protocol.KDF import scrypt
+from rdve.AES import CifrarComAES
 
 def hashArquivo(arquivo):
     tamanho = 65536
@@ -84,18 +86,26 @@ def importarChavePublica(chave):
     finally:
         _arq.close()
 
-def exportarChaveQRCode(chave, arquivo):
+def exportarChaveQRCode(chave, arquivo, senha):
+    encriptador = CifrarComAES(senha)
     if isinstance(chave, io.IOBase):
         _arq = open(chave)
-        img = qrcode.make(_arq.read())
-    else:
-        img = qrcode.make(chave.to_pem().decode())
+        cert = _arq.read()
+    elif isinstance(chave, SigningKey):
+        cert = chave.to_pem().hex()
+    encriptado = encriptador.criptografar(cert)
+    img = qrcode.make(encriptado)
     img.save(arquivo)
    
 def ripemd160(x):
     d = hashlib.new('ripemd160')
     d.update(x)
     return d
+
+def hashSenha(senha, sal):
+    _s = scrypt(senha.encode(), sal, 32, N=2**16, r=8, p=8)
+    return _s
+
 
 def gerarEndereco(chavePrivada):
     # generate private key , uncompressed WIF starts with "5"

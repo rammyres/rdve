@@ -53,7 +53,7 @@ class Cedulas(list):
             _Cedula.criarCedula()
             self.inserir(_Cedula)
 
-    def dicionarios(self):
+    def serializar(self):
         if len(self)>0:
             _dicionarios = []
             for _cedula in self:

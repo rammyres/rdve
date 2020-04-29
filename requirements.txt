@@ -2,4 +2,4 @@ qrcode
 ecdsa
 colorama
 pymerkle
-
+pycryptodomex
