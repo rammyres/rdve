@@ -47,19 +47,19 @@ class Eleitor:
             self.exportarChavePrivada_QR(_sk, senha)
 
     def exportarChavePrivada_QR(self, chave, senha):
-        encriptador = CifrarComAES(hashSenha(senha, self.aleatorio))
-        qr = qrcode.QRCode(
+        _encriptador = CifrarComAES(hashSenha(senha, self.aleatorio))
+        _qr = qrcode.QRCode(
                 version=None,
                 error_correction=qrcode.constants.ERROR_CORRECT_M,
                 box_size=24,
                 border=4,
             )
 
-        _chave_encriptada = encriptador.criptografar(chave.to_pem().encode('utf-8'))
+        _chave_encriptada = _encriptador.criptografar(chave.to_pem().encode('utf-8'))
 
-        qr.add_data(_chave_encriptada)
-        qr.make(fit=True)
-        _img = qr.make_image()
+        _qr.add_data(_chave_encriptada)
+        _qr.make(fit=True)
+        _img = _qr.make_image()
         _img.save("Eleitor{}.png".format(self.titulo))
     
     def importarChavePrivada(self, modo, chave = None):
