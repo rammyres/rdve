@@ -48,7 +48,7 @@ class Cedulas(list):
     def criarCedulas(self, saldo):
         if not self.endUrna:
             raise enderecoDaUrnaNulo
-        for x in range(saldo):
+        for _ in range(saldo):
             _Cedula = _Cedula()
             _Cedula.criarCedula()
             self.inserir(_Cedula)

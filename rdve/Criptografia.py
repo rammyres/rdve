@@ -3,7 +3,7 @@ from ecdsa import SigningKey, VerifyingKey, curves, SECP256k1
 from Cryptodome.Protocol.KDF import scrypt
 from AES import CifrarComAES
 
-class criptografia:
+class Criptografia:
 
     def gerarChavePrivada(self):
         _sk = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
