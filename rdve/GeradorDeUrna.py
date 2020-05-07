@@ -4,13 +4,16 @@
     um dicionário que pode ser exportado no objeto genérico "bloco", sem a necessidade de herança. 
 '''
 
-from rdve.Cedulas import Cedulas
-from rdve.Erros import saldoInconsistente
-from rdve.Candidato import Candidato, tCandidato
-from rdve.Eleitor import Eleitor, tEleitor
-from rdve.Utilitarios import gerarChavePublica, gerarChavePrivada, gerarEndereco, importarChavePrivada, importarChavePublica, exportarChavePrivada, exportarChavePublica
+from Cedulas import Cedulas
+from Transacoes import Transacoes
+from Erros import saldoInconsistente, hashDoBlocoDeCedulasInvalido
+from Candidato import Candidato, tCandidato
+from Eleitor import Eleitor, tEleitor
+from Criptografia import Criptografia
+from Utilitarios import Utilitarios
 from pymerkle import MerkleTree, hashing
 from datetime import datetime
+import json
 
 class regEleitor:
     endereco = None
@@ -32,6 +35,8 @@ class regCandidato:
         self.saldo = 0
 
 class GeradorDeUrna:
+    auxCriptografia = Criptografia()
+    util = Utilitarios()
     eleicao = None
     idSecao = None
     zona = None
@@ -68,7 +73,13 @@ class GeradorDeUrna:
 
     def importarEleitor(self, dEleitor_):
         if dEleitor_["tipo"] == "eleitor":
-            _e = tEleitor(dEleitor_["nome"], dEleitor_["titulo"], dEleitor_["endereco"], dEleitor_["timestamp"])
+            _e = tEleitor(dEleitor_["nome"], 
+                          dEleitor_["titulo"], 
+                          dEleitor_["endereco"], 
+                          dEleitor_["chavePublica"], 
+                          dEleitor_["aleatorio"], 
+                          dEleitor_["timestamp"], 
+                          dEleitor_["assinatura"])
             self.incluirEleitor(_e)
 
     def incluirCandidato(self, candidato_):
@@ -102,14 +113,13 @@ class GeradorDeUrna:
             raise saldoInconsistente
 
     def gerarChaves(self):
-        exportarChavePrivada(gerarChavePrivada(), "tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
-        _sk = importarChavePrivada("tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
-        gerarChavePublica(_sk)
-        self.chavePublica = importarChavePublica("tmp/PubUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
+        _sk = self.auxCriptografia.gerarChavePrivada()
+        self.auxCriptografia.exportarChavePrivada(_sk, "tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
+        self.chavePublica = _sk.verifying_key
 
     def gerarEndereco(self):
         if self.chavePublica:
-            self.endereco = gerarEndereco("tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
+            self.endereco = self.util.gerarEndereco("tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
 
     def dados(self):
         return "{}{}{}{}{}{}{}".format(self.eleicao, self.zona, self.secao, self.endereco, self.saldoInicial, self.nonce, self.arvoreDeMerkle.rootHash)
@@ -121,6 +131,10 @@ class GeradorDeUrna:
             self.arvoreDeMerkle.update(_e.dados())
         for _cD in self.candidatos:
             self.arvoreDeMerkle.update(_cD.dados())
+
+    def importarCedulas(self, dicCedulas_):
+        if isinstance(dicCedulas_, Cedulas):
+            self.cedulas.importarDicionario(dicCedulas_["cedulas"])
 
     def calcularHash(self):
         self.nonce = 0
@@ -136,12 +150,14 @@ class GeradorDeUrna:
                 "eleicao": self.eleicao, 
                 "zona": self.zona, 
                 "secao": self.secao, 
-                "saldoInicial": self.saldoInicial,
                 "endereco": self.endereco, 
+                "saldoInicial": self.saldoInicial,                
                 "timestamp": self.timestamp,
                 "nonce": self.nonce,
+                "hashRaiz": self.arvoreDeMerkle.rootHash,
+                "hash": self.calcularHash(),
                 "arvoreDeMerkle": self.arvoreDeMerkle.serialize(),
-                "cedulas": self.cedulas.dicionarios(), 
+                "cedulas": self.cedulas.serializar(), 
                 "eleitores": self.serializarEleitores(), 
                 "candidatos": self.serializarCandidatos()
-                }            
+                }
