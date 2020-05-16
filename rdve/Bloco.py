@@ -3,7 +3,6 @@
 from Transacoes import Transacoes
 from Eleitor import tEleitor
 from Candidato import tCandidato
-from Urna import tUrna
 from hashlib import sha256
 from pymerkle import MerkleTree, hashing
 from Erros import arvoreDeMerkleInvalida, tipoDeTransacaoDesconhecido, registroSemTransacoes, listaDeTransacoesVazia

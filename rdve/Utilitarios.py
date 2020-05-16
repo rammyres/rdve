@@ -1,5 +1,5 @@
 import os, ecdsa, base58, binascii, hashlib, io, qrcode
-from Criptografia import criptografia
+from Criptografia import Criptografia
 from ecdsa import SigningKey
 
 
@@ -36,7 +36,7 @@ class Utilitarios:
         os.remove(caminho) 
 
     def gerarEndereco(self, chavePrivada):
-        cripto = criptografia()
+        cripto = Criptografia()
         # generate private key , uncompressed WIF starts with "5"
         #chavePrivada = os.urandom(32)
         #chaveCompleta = '80' + binascii.hexlify(chavePrivada).decode()

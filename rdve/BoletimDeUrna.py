@@ -8,7 +8,7 @@ from Transacoes import Transacoes
 from Voto import Voto
 from Candidato import Candidato
 from Eleitor import Eleitor
-import Utilitarios
+from Utilitarios import Utilitarios
 import json, os
 
 class boletimDeUrna:
@@ -81,6 +81,7 @@ class boletimDeUrna:
         _persistencia.close()
 
     def importarDicionario(self, dicionario):
+        util = Utilitarios()
 
         _tArvore = dicionario["arvoreDeMerkle"]
         _tTransacoesDict = OrderedDict()
@@ -102,7 +103,7 @@ class boletimDeUrna:
         self.arvoreDeMerkle = _tArvoreMerkle
 
         _tArvoreJson = open("tmp.json", "w")
-        Utilitarios.remover_seguramente("tmp.json", 5)
+        util.remover_seguramente("tmp.json", 5)
         _tArvoreJson.close()
         
         return self

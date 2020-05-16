@@ -22,16 +22,16 @@ class blocosDeTransacoesIntermediario(list):
             
         return d
 
-    def exportar(self, arq):
+    def exportar(self, arquivo):
         dicionarios = []
         for dados in self:
             dicionarios.append(dados._dicionario())
         
         dicionario = {"transacoes":dicionarios}
-        arquivo = open(arq, "w+")
+        arq = open(arquivo, "w+")
         
-        json.dump(dicionario, arquivo, indent=4)
-        arquivo.close()
+        json.dump(dicionario, arq, indent=4)
+        arq.close()
 
     def importar(self, arquivo):
         arq = open(arquivo, "r")
@@ -48,14 +48,19 @@ class blocosDeTransacoesIntermediario(list):
         else:
             for d in listaDeDicionarios:
                 if d["tipo"] == "Eleitor":
-                    t = Eleitor(d["nome"], d["titulo"], d["endereco"], d["timestamp"])
+                    t = Eleitor(d["nome"], 
+                                d["titulo"], 
+                                d["endereco"], 
+                                d["chavePublica"],
+                                d["aleatorio"],
+                                d["timestamp"])
                 elif d["tipo"] == "Candidato":
-                    t = Candidato(d["eleicao"], d["abrangencia"], d["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["timestamp"])
+                    t = Candidato(d)
                 elif d["tipo"] == "Voto":
-                    t = Voto(d["eleicao"], d["abrangencia"], d["numero"], d["aleatorio"])
+                    t = Voto(d["eleicao"], d["abrangencia"], d["numero"], d["aleatorio"], 
                 self.inserir(t)
     
-    def dicionarios(self):
+    def serializar(self):
         dicionarios = []
         for dados in self:
             dicionarios.append(dados._dicionario())
@@ -79,7 +84,13 @@ class blocosDeTransacoesFinal(list):
             self.append(transacao)
         
         else: 
-            raise tipoDeTransacaoDesconhecido            
+            raise tipoDeTransacaoDesconhecido
+
+    def buscarPorTitulo(self, titulo):
+        for x in range(len(self)):
+            if isinstance(self[x], Eleitor):
+                if titulo == self[x].titulo:
+                    return x
 
     def dados(self):
         d = []
@@ -121,9 +132,14 @@ class blocosDeTransacoesFinal(list):
         else:
             for d in listaDeDicionarios:
                 if d["tipo"] == "Eleitor":
-                    t = Eleitor(d["nome"], d["titulo"], d["endereco"], d["timestamp"])
+                    t = Eleitor(d["nome"], 
+                                d["titulo"], 
+                                d["endereco"], 
+                                d["chavePublica"],
+                                d["aleatorio"],
+                                d["timestamp"])
                 elif d["tipo"] == "Candidato":
-                    t = Candidato(9, ["nome"], d["titulo"], d["endereco"], d["numero"], d["processo"], d["aleatorio"], d["timestamp"])
+                    t = Candidato(d)
                 elif d["tipo"] == "Voto":
                     t = Voto(9, d["numero"], d["aleatorio"])
                 self.inserir(t)

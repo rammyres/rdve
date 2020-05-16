@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 from hashlib import sha256
 from datetime import datetime
-from rdve.Erros import dataInferiorAoLimite
+from Erros import dataInferiorAoLimite
 from Abrangencias import RegistroAbrangencias
-from Utilitarios import hashArquivo
+from Utilitarios import Utilitarios
 import json
 
 class BlocoGenesis:
+    util = Utilitarios()
     nonce = 0
     Hash = ''
     abrangencias = RegistroAbrangencias()
@@ -33,7 +34,7 @@ class BlocoGenesis:
     def importarAbrangencias(self, arquivo):
         try:
             self.abrangencias.importarAbrangencias(arquivo)
-            self.hashAbrangencias = hashArquivo(arquivo)
+            self.hashAbrangencias = self.util.hashArquivo(arquivo)
         except IOError:
             print("O arquivo de abrangências não existe. Um arquivo com as abrangências da eleição válido deve"\
                    "estar presente para gerar o blocogenesis")

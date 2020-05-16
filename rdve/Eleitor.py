@@ -83,11 +83,18 @@ class Eleitor:
     def assinar(self, dado):
         return self.chavePrivada.sign(dado)
 
-    def solicitarCandidatura(self, abrangencia, cargo, numero):
+    def requisitarCandidatura(self, abrangencia, cargo, numero):
         _timestamp = datetime.utcnow().timestamp()
-        _dados = "{}{}{}{}{}{}".format(abrangencia, cargo, self.nome, self.titulo, numero, _timestamp)
+        _dados = "{}:{}:{}:{}:{}:{}".format(
+                                            abrangencia, 
+                                            cargo, 
+                                            self.nome, 
+                                            self.titulo, 
+                                            numero, 
+                                            _timestamp
+                                            )
         _assinatura = self.assinar(_dados)
-        _dicionario = {"abrangencia": abrangencia,
+        _requisicao = {"abrangencia": abrangencia,
                        "cargo": cargo,
                        "nome": self.nome,
                        "titulo": self.titulo,
@@ -95,7 +102,18 @@ class Eleitor:
                        "assinatura": _assinatura,
                        "timestamp": _timestamp
         }
-        return _dicionario
+        return _requisicao
+    
+    def requisitarVoto(self):
+        _timestamp = datetime.utcnow().timestamp()
+        _dados = "{}:{}".format(self.titulo, _timestamp)
+        _assinatura = self.assinar(_dados)
+        _requisicao = {
+            "titulo": self.titulo,
+            "timestamp": _timestamp,
+            "assinatura": _assinatura
+        }
+        return _requisicao
 
 class tEleitor(Transacoes):
     assinatura = None

@@ -1,6 +1,6 @@
 import qrcode, json
 from ecdsa import SigningKey, VerifyingKey
-from Criptografia import criptografia
+from Criptografia import Criptografia
 
 class exportadorTitulo:
     _chave_privada = None
@@ -22,7 +22,7 @@ class exportadorTitulo:
         self.chave_encriptada = self.encriptarChave(self.chave_privada, senha, aleatorio)
 
     def encriptarChave(self, chave_privada, senha, aleatorio):
-        _encriptador = criptografia()
+        _encriptador = Criptografia()
         _ek = _encriptador.encriptarChaveAES(chave_privada, senha, aleatorio)
         return _ek
 
