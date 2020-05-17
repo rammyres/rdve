@@ -6,7 +6,7 @@
 
 from Cedulas import Cedulas
 from Transacoes import Transacoes
-from Erros import saldoInconsistente, hashDoBlocoDeCedulasInvalido
+from Erros import saldoInconsistente, hashDoBlocoDeCedulasInvalido, incrementoDeSaldoInvalido
 from Candidato import Candidato, tCandidato
 from Eleitor import Eleitor, tEleitor
 from Criptografia import Criptografia
@@ -14,6 +14,23 @@ from Utilitarios import Utilitarios
 from pymerkle import MerkleTree, hashing
 from datetime import datetime
 import json
+
+class saldoInicial:
+    
+    def __init__(self, idCargo):
+        self.idCargo = idCargo
+        self.saldo = 0
+
+    def incrementarSaldo(self, incremento):
+        if incremento == 1:
+            self.saldo += 1
+        elif self.saldo == 0:
+            self.saldo = incremento
+        else:
+            raise incrementoDeSaldoInvalido("Só é possível incrementar o saldo em unidades ou setar o valor total quando o saldo estiver 0")
+
+    def serializar(self):
+        return {"idCargo": self.idCargo, "saldo": self.saldo}
 
 class regEleitor:
     endereco = None
@@ -41,7 +58,7 @@ class GeradorDeUrna:
     idSecao = None
     zona = None
     secao = None
-    saldoInicial = None
+    saldosIniciais = []
     nonce = None
     timestamp = None
     endereco = None
@@ -51,18 +68,27 @@ class GeradorDeUrna:
     eleitores = []
     cedulas = Cedulas()
     
-    def __init__(self, eleicao, zona, secao):
+    def __init__(self, eleicao, tipoEleicao, cargos, zona, secao):
         self.eleicao = eleicao
+        self.tipoEleicao = tipoEleicao
+        self.cargos = cargos
         self.zona = zona
         self.secao = secao
         self.timestamp = datetime.utcnow().timestamp()
-        self.saldoInicial = 0
+
+    def setarSaldosIniciais(self):
+        if self.tipoEleicao == "1":
+            for cargo in self.cargos:
+                _saldo = saldoInicial(cargo.idCargo)
+                self.saldosIniciais.append(_saldo)
 
     def incluirEleitor(self, eleitor_):
         if isinstance(eleitor_, tEleitor):
             _tEleitor = regEleitor(eleitor_.endereco, eleitor_.titulo)
             self.eleitores.append(_tEleitor)
-            self.saldoInicial += 1
+            
+            for x in range(len(self.saldosIniciais)):
+                self.saldosIniciais[x].incrementarSaldo(1)
     
     def serializarEleitores(self):
         _dicionarios = []
@@ -108,7 +134,7 @@ class GeradorDeUrna:
     
     def gerarCedulas(self):
         if len(self.candidatos)>0 and len(self.eleitores)>0:
-            self.cedulas.criarCedulas(self.saldoInicial)
+            self.cedulas.criarCedulas(len(self.eleitores))
         else:
             raise saldoInconsistente
 
@@ -120,9 +146,23 @@ class GeradorDeUrna:
     def gerarEndereco(self):
         if self.chavePublica:
             self.endereco = self.util.gerarEndereco("tmp/PrivUrnaZona{}Secao{}.pem".format(self.zona, self.secao))
+    
+    def dadosSaldos(self):
+        _saldos = ''
+        for _s in self.saldosIniciais:
+            _saldos = "{}:{}:{}:".format(_saldos, _s.idCargo, _s.saldo)
+        return _saldos[:-1]
+
+    def serializarSaldos(self):
+        _dicio = []
+        for _s in self.saldosIniciais:
+            _saldo = {"idCargo": _s.idCargo, "saldoInicial": _s.saldo}
+            _dicio.append(_saldo)
+
+        return _dicio
 
     def dados(self):
-        return "{}{}{}{}{}{}{}".format(self.eleicao, self.zona, self.secao, self.endereco, self.saldoInicial, self.nonce, self.arvoreDeMerkle.rootHash)
+        return "{}:{}:{}:{}:{}:{}:{}".format(self.eleicao, self.zona, self.secao, self.endereco, self.dadosSaldos(), self.nonce, self.arvoreDeMerkle.rootHash)
 
     def calcularArvoreDeMerkle(self):
         for _c in self.cedulas:
@@ -151,7 +191,7 @@ class GeradorDeUrna:
                 "zona": self.zona, 
                 "secao": self.secao, 
                 "endereco": self.endereco, 
-                "saldoInicial": self.saldoInicial,                
+                "saldosIniciais": self.serializarSaldos(),             
                 "timestamp": self.timestamp,
                 "nonce": self.nonce,
                 "hashRaiz": self.arvoreDeMerkle.rootHash,

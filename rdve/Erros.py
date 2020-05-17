@@ -73,4 +73,10 @@ class requisicaoVotoInvalida(ValueError):
 
 class tipoDeEscolhaInvalida(TypeError):
     pass
+
+class excedeMaxVotos(ValueError):
+    pass
+
+class incrementoDeSaldoInvalido(ValueError):
+    pass
         

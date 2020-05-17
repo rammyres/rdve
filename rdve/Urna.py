@@ -66,7 +66,7 @@ class Urna:
             lista = blocosDeTransacoesIntermediario()
             self.votosNaoProcessados.append(lista)
 
-    def assinarVoto(self, voto):
+    def assinarCedula(self, voto):
         assinatura = self.chavePrivada.sign(voto.dados().encode())
         return assinatura 
 
@@ -76,6 +76,8 @@ class Urna:
             return self.cedulas.pop()
 
     def gerarVoto(self, numero):
+        if isinstance(votos, list):
+            cedula.voto
         v = Voto(self.eleicao, self.abrangencia, numero, self.sorteiaCedula().retornaIdCedula, self.endereco)
         v.assinatura = self.assinarVoto(v)
         return v
