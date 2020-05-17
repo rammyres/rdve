@@ -67,4 +67,10 @@ class abragenciaDuplicada(Exception):
 
 class abrangenciaInvalida(Exception):
     message = "Houve tentativa de insersão de uma abrangência não existe na lista de abrangências válidas"
+
+class requisicaoVotoInvalida(ValueError):
+    pass
+
+class tipoDeEscolhaInvalida(TypeError):
+    pass
         

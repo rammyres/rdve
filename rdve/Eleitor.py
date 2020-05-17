@@ -109,8 +109,7 @@ class Eleitor:
         _dados = "{}:{}".format(self.titulo, _timestamp)
         _assinatura = self.assinar(_dados)
         _requisicao = {
-            "titulo": self.titulo,
-            "timestamp": _timestamp,
+            "dados": _dados,
             "assinatura": _assinatura
         }
         return _requisicao

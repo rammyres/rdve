@@ -1,20 +1,29 @@
 #!/usr/bin/env python3
 from Transacoes import Transacoes
+from Erros import requisicaoVotoInvalida, tipoDeEscolhaInvalida
 from ecdsa import SECP256k1, VerifyingKey
-import codecs, os
+import os
 
 class Voto:
     assinatura = ''
-    def __init__(self, eleicao = None, abrangencia = None, numero = None, idCedula = None, enderecoDeOrigem = None, assinatura = None):
-        if numero and enderecoDeOrigem:
-            self.eleicao = eleicao 
-            self.abrangencia = abrangencia
-            self.numero = numero
-            self.enderecoDeOrigem = enderecoDeOrigem
-            self.idCedula = idCedula
+    escolhas = []
+    def __init__(self, requisicaoVoto, dadosUrna):
+            if self.verificarAssinatura(requisicaoVoto["dados"], 
+                                        requisicaoVoto["assinatura"], 
+                                        dadosUrna["chavePublicaEleitor"]):
+    
+                self.eleicao = dadosUrna["eleicao"] 
+                self.abrangencia = dadosUrna["abrangencia"]
+                self.enderecoDeOrigem = dadosUrna["enderecoDeOrigem"]
+                self.idCedula = dadosUrna["idCedula"]
+            else:
+                raise requisicaoVotoInvalida("Requisição de voto inválida ou mal formada")
 
-    def definirIdCedula(self, idCedula):
-        self.idCedula = idCedula
+    def inserirEscolhas(self, escolha):
+        if isinstance(escolha, dict):
+            self.escolhas.append(escolha)
+        else:
+            raise tipoDeEscolhaInvalida("Escolha invalida")
     
     def importarVoto(self, eleicao, abrangencia, numero, enderecoDeOrigem, idCedula, assinatura):
         self.eleicao = eleicao
