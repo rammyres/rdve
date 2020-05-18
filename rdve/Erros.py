@@ -79,4 +79,7 @@ class excedeMaxVotos(ValueError):
 
 class incrementoDeSaldoInvalido(ValueError):
     pass
+
+class tipoDeEleicaoInvalida(ValueError):
+    pass
         

@@ -75,12 +75,12 @@ class GeradorDeUrna:
         self.zona = zona
         self.secao = secao
         self.timestamp = datetime.utcnow().timestamp()
+        self.setarSaldosIniciais()
 
-    def setarSaldosIniciais(self):
-        if self.tipoEleicao == "1":
-            for cargo in self.cargos:
-                _saldo = saldoInicial(cargo.idCargo)
-                self.saldosIniciais.append(_saldo)
+    def setarSaldosIniciais(self):            
+        for cargo in self.cargos:
+            _saldo = saldoInicial(cargo.idCargo)
+            self.saldosIniciais.append(_saldo)
 
     def incluirEleitor(self, eleitor_):
         if isinstance(eleitor_, tEleitor):

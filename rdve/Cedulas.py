@@ -9,6 +9,7 @@ class Cedula:
     idCedula = None
     votos = []
     assinatura = ''
+    usada = False
 
     def __init__(self, tipoEleicao, idCedula = None, maxVotos = None):     
 
@@ -30,8 +31,14 @@ class Cedula:
             self.maxVotos == 1
         else:
             raise excedeMaxVotos("Numero de votos superior ao máximo permitido para a cédula")   
+    
+    def inserirVotos(self, votos):
+        if isinstance(votos, list):
+            for v in votos:
+                self._inserirVoto(v)
+            self.usada = True
 
-    def inserirVoto(self, voto):
+    def _inserirVoto(self, voto):
         # A classe vai verificar se o voto segue os votos contidos 
         # contém as chaves certas
         if len(self.votos) <= self.maxVotos:
@@ -53,7 +60,6 @@ class Cedula:
     def serializar(self):
         _d = [v for v in self.votos]
         return {"tipoEleicao": self.tipoEleicao, "idCedula":self.idCedula, "assinatura": self.assinatura, "votos":_d}
-
 
 class Cedulas(list):
     endUrna = None
