@@ -82,4 +82,10 @@ class incrementoDeSaldoInvalido(ValueError):
 
 class tipoDeEleicaoInvalida(ValueError):
     pass
+
+class cedulaNaoAssinada(ValueError):
+    pass
+
+class cedulaSemVotos(ValueError):
+    pass
         

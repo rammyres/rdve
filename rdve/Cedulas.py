@@ -7,9 +7,6 @@ from uuid import uuid4
 
 class Cedula:
     idCedula = None
-    votos = []
-    assinatura = ''
-    usada = False
 
     def __init__(self, tipoEleicao, idCedula = None, maxVotos = None):     
 
@@ -32,34 +29,12 @@ class Cedula:
         else:
             raise excedeMaxVotos("Numero de votos superior ao máximo permitido para a cédula")   
     
-    def inserirVotos(self, votos):
-        if isinstance(votos, list):
-            for v in votos:
-                self._inserirVoto(v)
-            self.usada = True
-
-    def _inserirVoto(self, voto):
-        # A classe vai verificar se o voto segue os votos contidos 
-        # contém as chaves certas
-        if len(self.votos) <= self.maxVotos:
-            if len(voto.keys)>2:
-                if voto.keys()[0] == "enderecoDestino" and voto.keys()[1] == "quantidade":
-                    self.votos.append(voto)
-        else:
-            raise excedeMaxVotos("Numero de votos superior ao máximo permitido para a cédula")   
-
-    def importarVotos(self, dicionario):
-        self.votos = [v for v in dicionario["votos"]]
-
     def importarDicionario(self, dicionario):
         _cedula = Cedula(dicionario["tipoEleicao"], dicionario["idCedula"], dicionario["maxVotos"])
-        self.assinatura = dicionario["assinatura"]
-        _cedula.votos = [v for v in dicionario["votos"]]
         return _cedula
     
     def serializar(self):
-        _d = [v for v in self.votos]
-        return {"tipoEleicao": self.tipoEleicao, "idCedula":self.idCedula, "assinatura": self.assinatura, "votos":_d}
+        return {"tipoEleicao": self.tipoEleicao, "idCedula":self.idCedula}
 
 class Cedulas(list):
     endUrna = None
@@ -117,5 +92,4 @@ class Cedulas(list):
             _cedula = Cedula(_dicionario["tipoEleicao"], 
                              _dicionario["idCedula"],
                              _dicionario["maxVotos"])
-            _cedula.importarVotos(dicionarios)
             self.inserir(_cedula)

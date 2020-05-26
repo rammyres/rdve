@@ -56,8 +56,8 @@ class blocosDeTransacoesIntermediario(list):
                                 d["timestamp"])
                 elif d["tipo"] == "Candidato":
                     t = Candidato(d)
-                elif d["tipo"] == "Voto":
-                    t = Voto(d["eleicao"], d["abrangencia"], d["numero"], d["aleatorio"], 
+                elif d["tipo"] == "CedulaPreenchida":
+                    t = CedulaPreenchida(d) 
                 self.inserir(t)
     
     def serializar(self):
