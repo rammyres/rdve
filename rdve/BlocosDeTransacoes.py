@@ -3,6 +3,8 @@ from Transacoes import Transacoes
 from Voto import Voto
 from Candidato import Candidato
 from Eleitor import Eleitor
+from Cedulas import Cedula
+from CedulaPreenchida import CedulaPreenchida
 from Erros import tipoDeTransacaoDesconhecido, listaDeDicioariosVazia
 import json
 

@@ -72,8 +72,6 @@ class CedulaPreenchida(Cedula):
                     "assinatura": self.assinatura,
                     "hash": self.Hash}
 
-    
-
 class boletimDeUrna:
     eleicao = None
     endereco = None
