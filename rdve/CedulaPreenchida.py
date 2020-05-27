@@ -4,13 +4,18 @@ from Erros import excedeMaxVotos, cedulaSemVotos, cedulaNaoAssinada
 
 class CedulaPreenchida(Cedula):
     votos = []
-    assinatura = None
-    Hash = None
-
+    
     def __init__(self, dicionario_cedula):
-        self.idCedula = dicionario_cedula["idCedula"]
-        self.tipoEleicao = dicionario_cedula["tipoEleicao"]
-        self.maxVotos = int(dicionario_cedula["maxVotos"])
+        try: 
+            self.idCedula = dicionario_cedula["idCedula"]
+            self.tipoEleicao = dicionario_cedula["tipoEleicao"]
+            self.maxVotos = int(dicionario_cedula["maxVotos"])
+            self.assinatura = dicionario_cedula["assinatura"]
+            self.Hash = dicionario_cedula["hash"]
+            self._importarVotos(dicionario_cedula)
+        except KeyError:
+            self.Hash == None
+            self.assinatura = None        
 
     def inserirVotos(self, votos):
         if isinstance(votos, list):
@@ -27,7 +32,7 @@ class CedulaPreenchida(Cedula):
         else:
             raise excedeMaxVotos("Numero de votos superior ao máximo permitido para a cédula")   
 
-    def importarVotos(self, dicionario):
+    def _importarVotos(self, dicionario):
         self.votos = [v for v in dicionario["votos"]]
 
     def dadosCedula(self):
@@ -45,18 +50,20 @@ class CedulaPreenchida(Cedula):
         else:
             raise cedulaNaoAssinada
 
-    def dicionario_votos(self):
+    def _serializar_votos(self):
         if self.votos:
             _d = [v for v in self.votos]
             return _d
         else:
             raise cedulaSemVotos
 
+
     def serializar(self):
         if len(self.votos) == self.maxVotos and self.assinatura and self.Hash:
-            return {"idCedula": self.idCedula, 
+            return {"tipo": "cedulaPreenchida",
+                    "idCedula": self.idCedula, 
                     "tipoEleicao": self.tipoEleicao, 
                     "maxVotos": self.maxVotos,
-                    "votos": self.dicionario_votos(),
+                    "votos": self._serializar_votos(),
                     "assinatura": self.assinatura,
                     "hash": self.Hash}

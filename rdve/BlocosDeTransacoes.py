@@ -142,6 +142,6 @@ class blocosDeTransacoesFinal(list):
                                 d["timestamp"])
                 elif d["tipo"] == "Candidato":
                     t = Candidato(d)
-                elif d["tipo"] == "Voto":
-                    t = Voto(9, d["numero"], d["aleatorio"])
+                elif d["tipo"] == "CedulaPreenchida":
+                    t = CedulaPreenchida(d)
                 self.inserir(t)
