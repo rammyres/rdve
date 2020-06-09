@@ -4,6 +4,7 @@ from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido, votoNulo, candi
 from Eleitor import Eleitor
 from Candidato import Candidato
 from Cedulas import Cedulas
+from CedulaPreenchida import CedulaPreenchida
 from BlocosDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
 from datetime import datetime, date
 from BoletimDeUrna import boletimDeUrna
@@ -22,7 +23,7 @@ class Voto:
     def serializar(self):
         return {"numero":self.numero, "enderecoDestino": self.enderecoDestino, "qtd": 1}
 
-class caidadatoValido:
+class candidatoValido:
     def __init__(self, nome, numero, endereco):
         if nome == None or numero == None or endereco == None:
             raise candidatoInvalido("Nome, numero ou endereço de destino do candidato inválido")
@@ -41,6 +42,7 @@ class Urna:
     chavePrivada = None
     cadidatos = []
     cedulas = Cedulas()
+    tmpVotos = []
 
     def __init__(self, eleicao = None, abrangencia = None, zona = None, secao = None, saldoInicial = None, endereco = None):
         self.eleicao = eleicao
@@ -101,12 +103,20 @@ class Urna:
                 return v
             else:
                 return None
-        
-    #marcada para alteração    
+
+    def limparVotos(self):
+        if self.tmpVotos:
+            self.tmpVotos.clear()
+            
     def votar(self, votos):
+        random.shuffle(self.cedulas)
+        _tmpIdCedula = self.cedulas[0].pop()
+        _tmpCedula = CedulaPreenchida(_tmpIdCedula)
+        _tmpCedula.inserirVotos(votos)
         random.shuffle(self.votosNaoProcessados)
-        self.votosNaoProcessados[0].inserir(voto)
+        self.votosNaoProcessados[0].inserir(_tmpCedula)
         self.exportarBlocosIntermediarios()
+        self.limparVotos()
 
     def prepararVotosParaApuracao(self):
         self.votosAProcessar = blocosDeTransacoesFinal()

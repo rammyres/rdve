@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from Transacoes import Transacoes
-from Voto import Voto
 from Candidato import Candidato
 from Eleitor import Eleitor
 from Cedulas import Cedula
