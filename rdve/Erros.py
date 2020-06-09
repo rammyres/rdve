@@ -88,4 +88,10 @@ class cedulaNaoAssinada(ValueError):
 
 class cedulaSemVotos(ValueError):
     pass
+
+class votoNulo(ValueError):
+    pass
+
+class candidatoInvalido(ValueError):
+    pass
         

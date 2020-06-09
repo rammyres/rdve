@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from Transacoes import Transacoes
-from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido
-from Voto import Voto
+from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido, votoNulo, candidatoInvalido
 from Eleitor import Eleitor
 from Candidato import Candidato
 from Cedulas import Cedulas
@@ -11,6 +10,26 @@ from BoletimDeUrna import boletimDeUrna
 from Criptografia import Criptografia
 from pymerkle import hashing
 import math, random, json
+
+class Voto:
+    def __init__(self, numero, enderecoDestino):
+        if numero == None or enderecoDestino == None:
+            raise votoNulo("Endereço ou numero não informados")
+        else:
+            self.numero = numero
+            self.enderecoDestino = enderecoDestino
+
+    def serializar(self):
+        return {"numero":self.numero, "enderecoDestino": self.enderecoDestino, "qtd": 1}
+
+class caidadatoValido:
+    def __init__(self, nome, numero, endereco):
+        if nome == None or numero == None or endereco == None:
+            raise candidatoInvalido("Nome, numero ou endereço de destino do candidato inválido")
+        else:
+            self.nome = nome
+            self.numero = numero
+            self.endereco = endereco
 
 class Urna:
     cripto = Criptografia()
@@ -76,13 +95,15 @@ class Urna:
             return self.cedulas.pop()
 
     def gerarVoto(self, numero):
-        if isinstance(votos, list):
-            cedula.voto
-        v = Voto(self.eleicao, self.abrangencia, numero, self.sorteiaCedula().retornaIdCedula, self.endereco)
-        v.assinatura = self.assinarVoto(v)
-        return v
+        for candidato in self.cadidatos:
+            if candidato.numero == numero:
+                v = Voto(numero, candidato.endereco)
+                return v
+            else:
+                return None
         
-    def votar(self, voto):
+    #marcada para alteração    
+    def votar(self, votos):
         random.shuffle(self.votosNaoProcessados)
         self.votosNaoProcessados[0].inserir(voto)
         self.exportarBlocosIntermediarios()

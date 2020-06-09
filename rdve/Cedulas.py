@@ -34,22 +34,10 @@ class Cedula:
         return _cedula
     
     def serializar(self):
-        return {"tipoEleicao": self.tipoEleicao, "idCedula":self.idCedula}
+        return {"tipoEleicao": self.tipoEleicao, "idCedula":self.idCedula, "maxVotos": self.maxVotos}
 
 class Cedulas(list):
     endUrna = None
-    _saldo = None 
-
-    @property
-    def saldo(self, saldo):
-        return self._saldo
-
-    @saldo.setter
-    def saldo(self, saldo):
-        if len(self)+1 != saldo:
-            raise saldoInconsistente
-        else:
-            self._saldo = saldo
 
     def __init__(self, endUrna = None):
         if endUrna:
@@ -61,7 +49,6 @@ class Cedulas(list):
     def inserir(self, _cedula):
         if isinstance(_cedula, Cedula):
             self.append(_cedula)
-            self.saldo += 1
 
     def criarCedulas(self, saldo):
         if not self.endUrna:
@@ -75,7 +62,7 @@ class Cedulas(list):
         if len(self)>0:
             _dicionarios = []
             for _cedula in self:
-                _dicionario = {"idCedula": _cedula.idCedula}
+                _dicionario = _cedula.serializar()
                 _dicionarios.append(_dicionario)
             return {"cedulas":_dicionarios}
         else:
