@@ -7,7 +7,7 @@ from CedulaPreenchida import CedulaPreenchida
 from Erros import tipoDeTransacaoDesconhecido, listaDeDicioariosVazia
 import json
 
-class blocosDeTransacoesIntermediario(list):
+class registroTransitorio(list):
 
     def inserir(self, transacao):
         
@@ -70,7 +70,7 @@ class blocosDeTransacoesIntermediario(list):
 
         return dicionario
     
-class blocosDeTransacoesFinal(list):
+class registroFinal(list):
 
     def inserir(self, transacao):
         

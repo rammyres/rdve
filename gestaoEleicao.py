@@ -3,4 +3,3 @@ from rdve.Urna.GeradorDeUrna import GeradorDeUrna
 from rdve.Bloco import Bloco
 
 mUrna = GeradorDeUrna()
-mBloco = Bloco()

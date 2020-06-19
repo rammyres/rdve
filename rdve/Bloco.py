@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 from Transacoes import Transacoes
 from Eleitor import tEleitor
 from Candidato import tCandidato

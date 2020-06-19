@@ -94,4 +94,10 @@ class votoNulo(ValueError):
 
 class candidatoInvalido(ValueError):
     pass
+
+class votosNaoPreparadosParaApuracao(Exception):
+    pass
+
+class tipoDeOperadorInvalido(TypeError):
+    pass
         

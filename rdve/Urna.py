@@ -1,16 +1,37 @@
 #!/usr/bin/env python3
 from Transacoes import Transacoes
-from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido, votoNulo, candidatoInvalido
+from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido, votoNulo, candidatoInvalido, votosNaoPreparadosParaApuracao, tipoDeOperadorInvalido
 from Eleitor import Eleitor
 from Candidato import Candidato
 from Cedulas import Cedulas
 from CedulaPreenchida import CedulaPreenchida
-from BlocosDeTransacoes import blocosDeTransacoesFinal, blocosDeTransacoesIntermediario
+from BlocosDeTransacoes import registroTransitorio, registroFinal
 from datetime import datetime, date
 from BoletimDeUrna import boletimDeUrna
 from Criptografia import Criptografia
 from pymerkle import hashing
 import math, random, json
+
+class Mesario:
+    nome = ''
+    titulo = ''
+    def __init__(self, nome, titulo):
+        self.nome = nome
+        self.titulo = titulo
+
+class Presidente(Mesario):
+    pass
+
+class Operadores(list):
+    def __init__(self, *operadores):
+        for x in operadores:
+            self.inserir(x)
+
+    def inserir(self, operador):
+        if isinstance(operador, Mesario):
+            self.append(operador)
+        else:
+            raise tipoDeOperadorInvalido("Operador deve ser do tipo Mesario ou Presidente")
 
 class Voto:
     def __init__(self, numero, enderecoDestino):
@@ -31,8 +52,15 @@ class candidatoValido:
             self.nome = nome
             self.numero = numero
             self.endereco = endereco
+    
+    def retornaEnderecoPeloNumero(self, numero):
+        if self.numero == numero:
+            return self.endereco
+        else:
+            return None
 
 class Urna:
+    operadores = Operadores()
     cripto = Criptografia()
     zona = None
     secao = None
@@ -74,17 +102,17 @@ class Urna:
                 candidato = (dicionario["numero"], dicionario["nome"], dicionario["endereco"])
                 self.cadidatos.append(candidato)
 
-    def exportarBlocosIntermediarios(self):
+    def exportaRegistrosIntermediarios(self):
         for x in range(len(self.votosNaoProcessados)):
             self.votosNaoProcessados[x].exportar("tmp/bloco{}.json".format(x))
     
     def criarPoolDeVotacao(self):
         self.votosNaoProcessados = []
         _n = math.ceil(math.log2(self.saldoInicial))
-        self.exportarBlocosIntermediarios()
+        self.exportaRegistrosIntermediarios()
         
         for _ in range (_n):
-            lista = blocosDeTransacoesIntermediario()
+            lista = registroTransitorio()
             self.votosNaoProcessados.append(lista)
 
     def assinarCedula(self, voto):
@@ -115,11 +143,11 @@ class Urna:
         _tmpCedula.inserirVotos(votos)
         random.shuffle(self.votosNaoProcessados)
         self.votosNaoProcessados[0].inserir(_tmpCedula)
-        self.exportarBlocosIntermediarios()
+        self.exportaRegistrosIntermediarios()
         self.limparVotos()
 
     def prepararVotosParaApuracao(self):
-        self.votosAProcessar = blocosDeTransacoesFinal()
+        self.votosAProcessar = registroFinal()
 
         for _ in range(len(self.votosNaoProcessados)):
             random.shuffle(self.votosNaoProcessados)
@@ -127,3 +155,10 @@ class Urna:
                 random.shuffle(self.votosNaoProcessados[0])
                 v = self.votosNaoProcessados[0].pop()
                 self.votosAProcessar.inserir(v)
+    
+    def exportarRegistroFinal(self, *arquivos):
+        if self.votosAProcessar:
+            for x in arquivos:
+                self.votosAProcessar.exportar(x)
+        else:
+            raise votosNaoPreparadosParaApuracao("Os votos não estão preparados para apuração")
