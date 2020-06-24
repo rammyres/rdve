@@ -10,6 +10,7 @@ from datetime import datetime, date
 from BoletimDeUrna import boletimDeUrna
 from Criptografia import Criptografia
 from pymerkle import hashing
+from OperadoresDeUrna import Operadores
 import math, random, json
 
 
@@ -75,11 +76,19 @@ class Urna:
 
     def carregarDicionario(self, dicionario):
         if dicionario["tipo"] == "Urna":
-            self.iniciarUrna(dicionario["eleicao"], dicionario["abrangencia"], dicionario["zona"], dicionario["secao"], dicionario["saldoInicial"], dicionario["endereco"], dicionario["timestamp"])
+            self.iniciarUrna(dicionario["eleicao"], 
+                             dicionario["abrangencia"], 
+                             dicionario["zona"], 
+                             dicionario["secao"], 
+                             dicionario["saldoInicial"], 
+                             dicionario["endereco"], 
+                             dicionario["timestamp"])
             self.cedulas.importarDicionario(dicionario["cedulas"])
         if dicionario["tipo"] == "Candidato":
             if dicionario["abrangencia"] == self.abrangencia and dicionario["eleicao"] == self.eleicao:
-                candidato = (dicionario["numero"], dicionario["nome"], dicionario["endereco"])
+                candidato = (dicionario["numero"], 
+                             dicionario["nome"], 
+                             dicionario["endereco"])
                 self.cadidatos.append(candidato)
 
     def exportaRegistrosIntermediarios(self):

@@ -5,8 +5,9 @@
 '''
 
 from Cedulas import Cedulas
+from OperadoresDeUrna import Operadores, Mesario, Presidente
 from Transacoes import Transacoes
-from Erros import saldoInconsistente, hashDoBlocoDeCedulasInvalido, incrementoDeSaldoInvalido
+from Erros import saldoInconsistente, hashDoBlocoDeCedulasInvalido, incrementoDeSaldoInvalido, tipoDeOperadorInvalido
 from Candidato import Candidato, tCandidato
 from Eleitor import Eleitor, tEleitor
 from Criptografia import Criptografia
@@ -67,6 +68,7 @@ class GeradorDeUrna:
     candidatos = []
     eleitores = []
     cedulas = Cedulas()
+    operadores = Operadores()
     
     def __init__(self, eleicao, tipoEleicao, cargos, zona, secao):
         self.eleicao = eleicao
@@ -153,6 +155,15 @@ class GeradorDeUrna:
             _saldos = "{}:{}:{}:".format(_saldos, _s.idCargo, _s.saldo)
         return _saldos[:-1]
 
+    def incluirOperador(self, tipo, nome, titulo, chavePublica):
+        if tipo == "Mesario":
+            _operador = Mesario(nome, titulo, chavePublica)
+        elif tipo == "Presidente":
+            _operador = Presidente(nome, titulo, chavePublica)
+        else:
+            raise tipoDeOperadorInvalido
+        self.operadores.append(_operador)
+
     def serializarSaldos(self):
         _dicio = []
         for _s in self.saldosIniciais:
@@ -199,5 +210,6 @@ class GeradorDeUrna:
                 "arvoreDeMerkle": self.arvoreDeMerkle.serialize(),
                 "cedulas": self.cedulas.serializar(), 
                 "eleitores": self.serializarEleitores(), 
-                "candidatos": self.serializarCandidatos()
+                "candidatos": self.serializarCandidatos(),
+                "operadores": self.operadores.serializar()
                 }
