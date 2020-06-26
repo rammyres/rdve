@@ -4,12 +4,13 @@ from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido, votoNulo, candi
 from Eleitor import Eleitor
 from Candidato import Candidato
 from Cedulas import Cedulas
-from CedulaPreenchida import CedulaPreenchida
+from CedulasEmVotacao import CedulasEmVotacao
 from BlocosDeTransacoes import registroTransitorio, registroFinal
+from saldoInicial import saldoInicial
 from datetime import datetime, date
 from BoletimDeUrna import boletimDeUrna
 from Criptografia import Criptografia
-from pymerkle import hashing
+from pymerkle import MerkleTree, hashing
 from OperadoresDeUrna import Operadores
 import math, random, json
 
@@ -40,37 +41,25 @@ class candidatoValido:
         else:
             return None
 
-class Urna:
-    operadores = Operadores()
-    cripto = Criptografia()
-    zona = None
-    secao = None
-    saldoInicial = None
-    timestamp = None
-    endereco = None
-    chavePrivada = None
-    cadidatos = []
-    cedulas = Cedulas()
-    tmpVotos = []
+class Urna:    
 
     def __init__(self, eleicao = None, abrangencia = None, zona = None, secao = None, saldoInicial = None, endereco = None):
         self.eleicao = eleicao
         self.abrangencia = abrangencia
         self.zona = zona
-        self.secao = secao
-        self.saldo = saldoInicial
+        self.secao = None
+        self.saldoInicial = None
+        self.timestamp = None
+        self.endereco = None
+        self.chavePrivada = None
+        self.arvoreDeMerkle = MerkleTree()
+        self.operadores = Operadores()
+        self.cripto = Criptografia()    
+        self.cadidatos = []
+        self.cedulasEmVotacao = CedulasEmVotacao()
+        self.tmpVotos = []
         self.timestamp = datetime.timestamp(datetime.now().timestamp())
-        self.boletimDeUrna = boletimDeUrna(eleicao, abrangencia, endereco, zona, secao, self.endereco)
-
-    def iniciarUrna(self, eleicao, abrangencia, zona, secao, saldoInicial, endereco, timestamp):
-        self.eleicao = eleicao
-        self.abrangencia = abrangencia
-        self.zona = zona
-        self.secao = secao
-        self.saldo = saldoInicial
-        self.timestamp = timestamp
-        self.endereco = endereco
-    
+  
     def dados(self):
         return(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
 
@@ -151,3 +140,38 @@ class Urna:
                 self.votosAProcessar.exportar(x)
         else:
             raise votosNaoPreparadosParaApuracao("Os votos não estão preparados para apuração")
+    
+    def importarSaldosIniciais(self, dictSaldos):
+        for _dict in dictSaldos:
+            _saldo = saldoInicial(_dict["idCargo"])
+            _saldo.incrementarSaldo(int(_dict["saldo"]))
+        
+
+    def importarUrna(self, dicionario):
+        self.eleicao = dicionario["eleicao"]
+        self.abrangencia = dicionario["abrangencia"]
+        self.zona = dicionario["zona"]
+        self.secao = dicionario["secao"]
+        self.endereco = dicionario["endereco"]
+        self.importarSaldosIniciais(dicionario["saldosIniciais"])
+        self.timestamp = dicionario["timestamp"]
+        self.nonce = dicionario["nonce"]
+        self.hashRaiz = dicionario["hashRaiz"]
+        self.Hash = dicionario["hash"]
+        self.cedulasEmVotacao.importarCedulasEmBranco(dicionario["cedulas"])
+        self.eleitores.
+        "eleicao": self.eleicao, 
+                "zona": self.zona, 
+                "secao": self.secao, 
+                "endereco": self.endereco, 
+                "saldosIniciais": self.serializarSaldos(),             
+                "timestamp": self.timestamp,
+                "nonce": self.nonce,
+                "hashRaiz": self.arvoreDeMerkle.rootHash,
+                "hash": self.calcularHash(),
+                "arvoreDeMerkle": self.arvoreDeMerkle.serialize(),
+                "cedulas": self.cedulas.serializar(), 
+                "eleitores": self.serializarEleitores(), 
+                "candidatos": self.serializarCandidatos(),
+                "operadores": self.operadores.serializar()
+                

@@ -5,7 +5,8 @@
 '''
 
 from Cedulas import Cedulas
-from OperadoresDeUrna import Operadores, Mesario, Presidente
+from saldoInicial import saldoInicial
+from OperadoresDeUrna import Operadores, Operador
 from Transacoes import Transacoes
 from Erros import saldoInconsistente, hashDoBlocoDeCedulasInvalido, incrementoDeSaldoInvalido, tipoDeOperadorInvalido
 from Candidato import Candidato, tCandidato
@@ -15,23 +16,6 @@ from Utilitarios import Utilitarios
 from pymerkle import MerkleTree, hashing
 from datetime import datetime
 import json
-
-class saldoInicial:
-    
-    def __init__(self, idCargo):
-        self.idCargo = idCargo
-        self.saldo = 0
-
-    def incrementarSaldo(self, incremento):
-        if incremento == 1:
-            self.saldo += 1
-        elif self.saldo == 0:
-            self.saldo = incremento
-        else:
-            raise incrementoDeSaldoInvalido("Só é possível incrementar o saldo em unidades ou setar o valor total quando o saldo estiver 0")
-
-    def serializar(self):
-        return {"idCargo": self.idCargo, "saldo": self.saldo}
 
 class regEleitor:
     endereco = None
@@ -70,12 +54,13 @@ class GeradorDeUrna:
     cedulas = Cedulas()
     operadores = Operadores()
     
-    def __init__(self, eleicao, tipoEleicao, cargos, zona, secao):
+    def __init__(self, eleicao, tipoEleicao, abrangencia, zona, secao, cargos):
         self.eleicao = eleicao
         self.tipoEleicao = tipoEleicao
-        self.cargos = cargos
+        self.abrangencia = abrangencia
         self.zona = zona
         self.secao = secao
+        self.cargos = cargos
         self.timestamp = datetime.utcnow().timestamp()
         self.setarSaldosIniciais()
 
@@ -88,7 +73,7 @@ class GeradorDeUrna:
         if isinstance(eleitor_, tEleitor):
             _tEleitor = regEleitor(eleitor_.endereco, eleitor_.titulo)
             self.eleitores.append(_tEleitor)
-            
+
             for x in range(len(self.saldosIniciais)):
                 self.saldosIniciais[x].incrementarSaldo(1)
     
@@ -156,12 +141,7 @@ class GeradorDeUrna:
         return _saldos[:-1]
 
     def incluirOperador(self, tipo, nome, titulo, chavePublica):
-        if tipo == "Mesario":
-            _operador = Mesario(nome, titulo, chavePublica)
-        elif tipo == "Presidente":
-            _operador = Presidente(nome, titulo, chavePublica)
-        else:
-            raise tipoDeOperadorInvalido
+        _operador = Operador(tipo, nome, titulo, chavePublica)
         self.operadores.append(_operador)
 
     def serializarSaldos(self):
@@ -198,7 +178,8 @@ class GeradorDeUrna:
 
     def serializar(self):
         return {
-                "eleicao": self.eleicao, 
+                "eleicao": self.eleicao,
+                "abrangencia": self.abrangencia,
                 "zona": self.zona, 
                 "secao": self.secao, 
                 "endereco": self.endereco, 

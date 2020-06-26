@@ -100,4 +100,7 @@ class votosNaoPreparadosParaApuracao(Exception):
 
 class tipoDeOperadorInvalido(TypeError):
     pass
+
+class naoEhCedula(TypeError):
+    pass
         

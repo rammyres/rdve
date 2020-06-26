@@ -8,11 +8,12 @@ from uuid import uuid4
 class Cedula:
     idCedula = None
 
-    def __init__(self, tipoEleicao, idCedula = None, maxVotos = None):     
+    def __init__(self, tipoEleicao, eleicao, idCedula = None, maxVotos = None):     
 
         if idCedula and tipoEleicao and maxVotos:
             self.idCedula = idCedula
             self.tipoEleicao = tipoEleicao
+            self.eleicao = eleicao
             self.maxVotos = maxVotos
         else:
             self.criarCedula(tipoEleicao)
@@ -30,11 +31,14 @@ class Cedula:
             raise excedeMaxVotos("Numero de votos superior ao máximo permitido para a cédula")   
     
     def importarDicionario(self, dicionario):
-        _cedula = Cedula(dicionario["tipoEleicao"], dicionario["idCedula"], dicionario["maxVotos"])
+        _cedula = Cedula(dicionario["tipoEleicao"], dicionario["eleicao"], dicionario["idCedula"], dicionario["maxVotos"])
         return _cedula
     
     def serializar(self):
-        return {"tipoEleicao": self.tipoEleicao, "idCedula":self.idCedula, "maxVotos": self.maxVotos}
+        return {"tipoEleicao": self.tipoEleicao, 
+                "eleicao": self.eleicao, 
+                "idCedula":self.idCedula, 
+                "maxVotos": self.maxVotos}
 
 class Cedulas(list):
     endUrna = None
@@ -76,7 +80,8 @@ class Cedulas(list):
     def importarDicionario(self, dicionarios):
         self.endUrna = dicionarios["endUrna"]
         for _dicionario in dicionarios["cedulas"]:
-            _cedula = Cedula(_dicionario["tipoEleicao"], 
+            _cedula = Cedula(_dicionario["tipoEleicao"],
+                             _dicionario["eleicao"], 
                              _dicionario["idCedula"],
                              _dicionario["maxVotos"])
             self.inserir(_cedula)

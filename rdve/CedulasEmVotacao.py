@@ -1,8 +1,8 @@
 from Cedulas import Cedula
 from hashlib import sha256
-from Erros import excedeMaxVotos, cedulaSemVotos, cedulaNaoAssinada
+from Erros import excedeMaxVotos, cedulaSemVotos, cedulaNaoAssinada, naoEhCedula
 
-class CedulaPreenchida(Cedula):
+class CedulaEmVotacao(Cedula):
     votos = []
     
     def __init__(self, dicionario_cedula):
@@ -67,3 +67,31 @@ class CedulaPreenchida(Cedula):
                     "votos": self._serializar_votos(),
                     "assinatura": self.assinatura,
                     "hash": self.Hash}
+
+class CedulasEmVotacao(list):
+
+    def __init__(self, dicionariosCedulas):
+        if dicionariosCedulas:
+            self.importarCedulasEmBranco(dicionariosCedulas)
+        
+
+    def inserirCedula(self, cedula):
+        if isinstance(cedula, Cedula):
+            self.append(cedula)
+        else:
+            raise naoEhCedula
+
+    def importarCedulasEmBranco(self, dicionariosCedulas):
+        for _dictCedula in dicionariosCedulas:
+            _cedula = CedulaEmVotacao(_dictCedula)
+            self.inserirCedula(_cedula)
+    
+    def serializar(self):
+        _cedulas = []
+        for _c in self:
+            self.idCedula = dicionario_cedula["idCedula"]
+            self.tipoEleicao = dicionario_cedula["tipoEleicao"]
+            self.maxVotos = int(dicionario_cedula["maxVotos"])
+            self.assinatura = dicionario_cedula["assinatura"]
+            self.Hash = dicionario_cedula["hash"]
+            _cc = {"idCedula":self.idCedula, "tipoEleicao"}
