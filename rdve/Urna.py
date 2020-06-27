@@ -89,8 +89,8 @@ class Urna:
         self.exportaRegistrosIntermediarios()
         
         for _ in range (_n):
-            lista = registroTransitorio()
-            self.votosNaoProcessados.append(lista)
+            _lista = registroTransitorio()
+            self.votosNaoProcessados.append(_lista)
 
     def assinarCedula(self, voto):
         assinatura = self.chavePrivada.sign(voto.dados().encode())
@@ -103,7 +103,7 @@ class Urna:
 
     def gerarVoto(self, numero):
         for candidato in self.candidatos:
-            if candidato.numero == numero:
+            if candidato.retornaEnderecoPeloNumero(numero):
                 v = Voto(numero, candidato.endereco)
                 return v
             else:
@@ -173,5 +173,4 @@ class Urna:
         self.cedulasEmVotacao.importarCedulasEmBranco(dicionario["cedulas"])
         self.importarEleitores(dicionario["eleitores"])
         self.importarCandidatos(dicionario["candidatos"])
-        self.operadores.importar(dicionario["operadores"])
-                
+        self.operadores.importar(dicionario["operadores"])                
