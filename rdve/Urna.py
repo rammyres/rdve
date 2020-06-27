@@ -7,7 +7,7 @@ from Candidato import Candidato
 from Cedulas import Cedulas
 from CedulasEmVotacao import CedulasEmVotacao
 from BlocosDeTransacoes import registroTransitorio, registroFinal
-from saldoInicial import saldoInicial
+from saldoInicial import saldoInicial, saldosIniciais
 from datetime import datetime, date
 from BoletimDeUrna import boletimDeUrna
 from Criptografia import Criptografia
@@ -59,14 +59,13 @@ class eleitorValido:
 
 class Urna:    
 
-    def __init__(self, eleicao = None, abrangencia = None, zona = None, secao = None, saldoInicial = None, endereco = None):
+    def __init__(self, eleicao = None, abrangencia = None, zona = None, secao = None, saldosIniciais = None, endereco = None):
         self.eleicao = eleicao
         self.abrangencia = abrangencia
         self.zona = zona
-        self.secao = None
-        self.saldoInicial = None
-        self.timestamp = None
-        self.endereco = None
+        self.secao = secao
+        self.saldosIniciais = saldosIniciais()
+        self.endereco = endereco
         self.chavePrivada = None
         self.arvoreDeMerkle = MerkleTree()
         self.operadores = Operadores()
@@ -78,24 +77,7 @@ class Urna:
         self.timestamp = datetime.timestamp(datetime.now().timestamp())
   
     def dados(self):
-        return(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldos, self.timestamp, self.endereco)
-
-    def carregarDicionario(self, dicionario):
-        if dicionario["tipo"] == "Urna":
-            self.iniciarUrna(dicionario["eleicao"], 
-                             dicionario["abrangencia"], 
-                             dicionario["zona"], 
-                             dicionario["secao"], 
-                             dicionario["saldoInicial"], 
-                             dicionario["endereco"], 
-                             dicionario["timestamp"])
-            self.cedulas.importarDicionario(dicionario["cedulas"])
-        if dicionario["tipo"] == "Candidato":
-            if dicionario["abrangencia"] == self.abrangencia and dicionario["eleicao"] == self.eleicao:
-                candidato = (dicionario["numero"], 
-                             dicionario["nome"], 
-                             dicionario["endereco"])
-                self.cadidatos.append(candidato)
+        return(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldosIniciais.dados(), self.timestamp, self.endereco)
 
     def exportaRegistrosIntermediarios(self):
         for x in range(len(self.votosNaoProcessados)):
@@ -103,7 +85,7 @@ class Urna:
     
     def criarPoolDeVotacao(self):
         self.votosNaoProcessados = []
-        _n = math.ceil(math.log2(self.saldoInicial))
+        _n = math.ceil(math.log2(len(self.cedulasEmVotacao)))
         self.exportaRegistrosIntermediarios()
         
         for _ in range (_n):
@@ -115,12 +97,12 @@ class Urna:
         return assinatura 
 
     def sorteiaCedula(self):
-        if len(self.cedulas)>0:
-            random.shuffle(self.cedulas)
-            return self.cedulas.pop()
+        if len(self.cedulasEmVotacao)>0:
+            random.shuffle(self.cedulasEmVotacao)
+            return self.cedulasEmVotacao[0].pop()
 
     def gerarVoto(self, numero):
-        for candidato in self.cadidatos:
+        for candidato in self.candidatos:
             if candidato.numero == numero:
                 v = Voto(numero, candidato.endereco)
                 return v
@@ -132,9 +114,7 @@ class Urna:
             self.tmpVotos.clear()
             
     def votar(self, votos):
-        random.shuffle(self.cedulas)
-        _tmpIdCedula = self.cedulas[0].pop()
-        _tmpCedula = CedulaPreenchida(_tmpIdCedula)
+        _tmpCedula = self.sorteiaCedula()
         _tmpCedula.inserirVotos(votos)
         random.shuffle(self.votosNaoProcessados)
         self.votosNaoProcessados[0].inserir(_tmpCedula)
@@ -162,6 +142,7 @@ class Urna:
         for _dict in dictSaldos:
             _saldo = saldoInicial(_dict["idCargo"])
             _saldo.incrementarSaldo(int(_dict["saldo"]))
+            self.saldosIniciais.inserir(_saldo)
 
     def importarEleitores(self, dictEleitores):
         for _e in dictEleitores:

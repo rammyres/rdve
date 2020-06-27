@@ -1,4 +1,4 @@
-from Erros import incrementoDeSaldoInvalido
+from Erros import incrementoDeSaldoInvalido, tipoDeEleicaoInvalida
 
 class saldoInicial:
     
@@ -16,3 +16,31 @@ class saldoInicial:
 
     def serializar(self):
         return {"idCargo": self.idCargo, "saldo": self.saldo}
+
+class saldosIniciais(list):
+
+    def __init__(self, tipoEleicao):
+        if tipoEleicao == "1":
+            self.maxSaldos = 5
+        elif tipoEleicao == "2":
+            self.maxSaldos = 2
+        elif tipoEleicao == "3" or tipoEleicao == "4" or tipoEleicao == "5":
+            self.maxSaldos == 1
+        else:
+            raise tipoDeEleicaoInvalida("Tipo de eleição não previsto")
+
+    def serializar(self):
+        _dictSaldos = [{x.serializar() for x in self}]
+
+        return _dictSaldos
+
+    def inserir(self, saldo):
+        if isinstance(saldo, saldoInicial):
+            self.append(saldo)
+        else:
+            raise TypeError("Tipo de saldo inválido")
+
+    def dados(self):
+        _dados = ':'
+        return _dados.join(self)
+
