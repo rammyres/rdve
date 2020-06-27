@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from Transacoes import Transacoes
-from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido, votoNulo, candidatoInvalido, votosNaoPreparadosParaApuracao, tipoDeOperadorInvalido
+from Erros import urnaSemEndereco, hashDoBlocoDeCedulasInvalido, votoNulo, candidatoInvalido, eleitorInvalido,\
+                  votosNaoPreparadosParaApuracao, tipoDeOperadorInvalido
 from Eleitor import Eleitor
 from Candidato import Candidato
 from Cedulas import Cedulas
@@ -41,6 +42,21 @@ class candidatoValido:
         else:
             return None
 
+class eleitorValido:
+    def __init__(self, nome, titulo, endereco):
+        if nome == None or titulo == None or endereco == None:
+            raise eleitorInvalido
+        else: 
+            self.nome = nome
+            self.titulo = titulo
+            self.endereco = endereco
+
+    def retornaEnderecoPeloTitulo(self, titulo):
+        if self.titulo == titulo:
+            return self.endereco
+        else:
+            return None
+
 class Urna:    
 
     def __init__(self, eleicao = None, abrangencia = None, zona = None, secao = None, saldoInicial = None, endereco = None):
@@ -55,13 +71,14 @@ class Urna:
         self.arvoreDeMerkle = MerkleTree()
         self.operadores = Operadores()
         self.cripto = Criptografia()    
-        self.cadidatos = []
         self.cedulasEmVotacao = CedulasEmVotacao()
         self.tmpVotos = []
+        self.candidatos = []
+        self.eleitores = []
         self.timestamp = datetime.timestamp(datetime.now().timestamp())
   
     def dados(self):
-        return(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldo, self.timestamp, self.endereco)
+        return(self.eleicao, self.abrangencia, self.zona, self.secao, self.saldos, self.timestamp, self.endereco)
 
     def carregarDicionario(self, dicionario):
         if dicionario["tipo"] == "Urna":
@@ -145,6 +162,20 @@ class Urna:
         for _dict in dictSaldos:
             _saldo = saldoInicial(_dict["idCargo"])
             _saldo.incrementarSaldo(int(_dict["saldo"]))
+
+    def importarEleitores(self, dictEleitores):
+        for _e in dictEleitores:
+            _eleitor = eleitorValido(_e["nome"],
+                                    _e["titulo"],
+                                    _e["endereco"])
+            self.eleitores.append(_eleitor)
+    
+    def importarCandidatos(self, dictCandidatos):
+        for _c in dictCandidatos:
+            _candidato = candidatoValido(_c["nome"],
+                                        _c["numero"],
+                                        _c["endereco"])
+            self.candidatos.append(_candidato)
         
 
     def importarUrna(self, dicionario):
@@ -159,19 +190,7 @@ class Urna:
         self.hashRaiz = dicionario["hashRaiz"]
         self.Hash = dicionario["hash"]
         self.cedulasEmVotacao.importarCedulasEmBranco(dicionario["cedulas"])
-        self.eleitores.
-        "eleicao": self.eleicao, 
-                "zona": self.zona, 
-                "secao": self.secao, 
-                "endereco": self.endereco, 
-                "saldosIniciais": self.serializarSaldos(),             
-                "timestamp": self.timestamp,
-                "nonce": self.nonce,
-                "hashRaiz": self.arvoreDeMerkle.rootHash,
-                "hash": self.calcularHash(),
-                "arvoreDeMerkle": self.arvoreDeMerkle.serialize(),
-                "cedulas": self.cedulas.serializar(), 
-                "eleitores": self.serializarEleitores(), 
-                "candidatos": self.serializarCandidatos(),
-                "operadores": self.operadores.serializar()
+        self.importarEleitores(dicionario["eleitores"])
+        self.importarCandidatos(dicionario["candidatos"])
+        self.operadores.importar(dicionario["operadores"])
                 

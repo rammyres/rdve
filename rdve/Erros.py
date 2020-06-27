@@ -95,6 +95,9 @@ class votoNulo(ValueError):
 class candidatoInvalido(ValueError):
     pass
 
+class eleitorInvalido(ValueError):
+    pass
+
 class votosNaoPreparadosParaApuracao(Exception):
     pass
 
